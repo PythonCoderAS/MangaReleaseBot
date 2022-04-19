@@ -1,3 +1,0 @@
-[submodule "vendored/discord.py"]
-	path = vendored/discord.py
-	url = https://github.com/Rapptz/discord.py.git
