@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Pattern, TYPE_CHECKING
+from typing import Dict, List, Optional, Pattern, Sequence, TYPE_CHECKING
 
 from discord import Embed
 from discord.ext.commands import Context
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True)
 class UpdateEntry:
     entry: MangaEntry
+    thread_title: str
     embed: Optional[Embed] = None
     message: Optional[str] = None
 
@@ -57,6 +58,6 @@ class BaseSource(ABC):
         await ctx.send(message)
 
     @abstractmethod
-    async def check_updates(self, last_update: datetime) -> List[UpdateEntry]:
+    async def check_updates(self, last_update: datetime, data: Dict[str, Sequence[MangaEntry]]) -> List[UpdateEntry]:
         """Check for updates and return a list of UpdateEntry objects."""
         raise NotImplementedError

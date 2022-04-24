@@ -1,5 +1,6 @@
 from discord import Interaction
-from discord.app_commands import Group
+from discord.app_commands import Group, checks
+from discord.app_commands.checks import bot_has_permissions, has_permissions
 from discord.ext.commands import Cog, Context
 
 from ..models import MangaEntry, Ping
@@ -20,6 +21,18 @@ class Manga(Cog):
     async def add(self, interaction: Interaction, url: str, message_channel_first: bool = False, private: bool = False):
         """Add a manga for checking."""
         ctx = await Context.from_interaction(interaction)
+        if private:
+            if not ctx.channel.permissions_for(ctx.me).create_private_threads:
+                return await ctx.send("I don't have permission to create private threads.")
+            elif not ctx.channel.permissions_for(ctx.author).create_private_threads:
+                return await ctx.send("You don't have permission to create private threads.")
+        else:
+            if not ctx.channel.permissions_for(ctx.me).create_public_threads:
+                return await ctx.send("I don't have permission to create public threads.")
+            elif not ctx.channel.permissions_for(ctx.author).create_public_threads:
+                return await ctx.send("You don't have permission to create public threads.")
+        if private and message_channel_first:
+            return await ctx.send("A message cannot be sent first for private threads.")
         for name, source in self.source_map.items():
             if source.url_regex.search(url):
                 await ctx.defer()
@@ -52,3 +65,5 @@ class Manga(Cog):
 
 async def setup(bot: "MangaReleaseBot"):
     await bot.add_cog(Manga(bot.source_map))
+
+
