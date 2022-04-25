@@ -1,14 +1,12 @@
 import re
-from collections import defaultdict
 from datetime import datetime
 from typing import Dict, List, Optional, Sequence
 
-from discord import Embed, Interaction
-from discord.ext.commands import Context
+from discord import Embed
 from guyamoe_api_types import Chapter, Series
 
-from ..models import MangaEntry
-from .base import BaseSource, UpdateEntry
+from ..base import BaseSource, UpdateEntry
+from ...models import MangaEntry
 
 
 def get_preferred_chapter_data(chapter_data: Chapter, preferred_groups: list[str]) -> tuple[List[str], int, str]:
@@ -26,7 +24,7 @@ def get_preferred_chapter_data(chapter_data: Chapter, preferred_groups: list[str
 
 class Guya(BaseSource):
 
-    source_name = 'guyamoe'
+    source_name = 'guya.moe'
     url_regex = re.compile(r'^https://guya.(?:cubari.)?moe/read/manga/([\w-]+)', re.IGNORECASE)
 
     base_endpoint = 'https://guya.moe/api'
@@ -48,6 +46,7 @@ class Guya(BaseSource):
                 data: Series = await resp.json()
             for chapter_num, chapter in data['chapters'].items():
                 group_pages, group_release_date, group_id = get_preferred_chapter_data(chapter, data['preferred_sort'])
+                print(group_release_date, last_update.timestamp(), group_release_date >= last_update.timestamp())
                 if group_release_date >= last_update.timestamp():
                     embed = Embed(title=f"New chapter released! {data['title']} Chapter {chapter_num}",
                                   url=f"{self.base_endpoint}/read/manga/{slug}/{chapter_num}",

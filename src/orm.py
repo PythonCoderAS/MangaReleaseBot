@@ -1,6 +1,6 @@
 from tortoise import Tortoise
 
-from .models import MangaEntry, Metadata, Ping  # noqa
+from .models import MangaEntry, Metadata, Ping, ThreadData  # noqa
 
 TORTOISE_ORM = {
     "connections": {

@@ -8,9 +8,10 @@ from discord import ChannelType, Object, TextChannel
 from discord.ext.commands import Cog
 from discord.ext.tasks import loop
 
-from ..models import MangaEntry
+from ..models import MangaEntry, ThreadData
 from ..sources import BaseSource
 from ..sources.base import UpdateEntry
+from ..views.sub_unsub import SubscribeOrUnsubscribe
 
 if TYPE_CHECKING:
     from ..bot import MangaReleaseBot
@@ -21,7 +22,7 @@ UTC = ZoneInfo('UTC')
 class UpdateChecker(Cog):
     @property
     def last_updated(self):
-        return datetime.fromtimestamp(self.bot.config_manager.last_updated).replace(tzinfo=UTC)
+        return datetime.fromtimestamp(self.bot.config_manager.last_updated, tz=UTC)
 
     def __init__(self, bot: 'MangaReleaseBot'):
         self.bot = bot
@@ -49,13 +50,20 @@ class UpdateChecker(Cog):
                 await thread.send(f"Adding role: <@&{ping.mention_id}>")
             else:
                 await thread.add_user(Object(ping.mention_id))
+        action_message = await thread.send("**__Thread Actions__**", view=SubscribeOrUnsubscribe(manga_entry.id))
+        if thread.permissions_for(self.bot.get_guild(manga_entry.guild_id).me).manage_messages:
+            await action_message.pin()
+        thread_data = ThreadData(thread_id=thread.id, entry=manga_entry)
+        await thread_data.save()
 
     @loop(minutes=10)
     async def update_check(self):
         await self.bot.wait_until_ready()
         print("Starting update check...")
+        print(self.bot.config_manager.last_updated)
         cur_time = datetime.now(UTC)
-        first_filter_round = await MangaEntry.all().distinct().values_list("guild_id", "channel_id")
+        first_filter_round = await MangaEntry.all().distinct().filter(deleted=None).values_list("guild_id",
+                                                                                                "channel_id")
         ids_to_check = []
         for guild_id, channel_id in first_filter_round:
             guild = self.bot.get_guild(guild_id)
@@ -66,12 +74,13 @@ class UpdateChecker(Cog):
                 if channel:
                     ids_to_check.append(channel_id)
         print("First round: ", ids_to_check)
-        second_filter_round: List[str] = await MangaEntry.all().distinct().values_list("source_id", flat=True)
+        second_filter_round: List[str] = await MangaEntry.all().distinct().filter(deleted=None).values_list("source_id",
+                                                                                                            flat=True)
         tasks = []
         for source_id in second_filter_round:
             source: BaseSource = self.bot.source_map.get(source_id, None)
             if source:
-                items = await MangaEntry.filter(source_id=source_id, channel_id__in=ids_to_check).all()
+                items = await MangaEntry.filter(source_id=source_id, channel_id__in=ids_to_check, deleted=None).all()
                 by_item_id = defaultdict(list)
                 for item in items:
                     by_item_id[item.item_id].append(item)
@@ -87,6 +96,7 @@ class UpdateChecker(Cog):
         await gather(*entry_tasks)
         self.bot.config_manager.last_updated = int(cur_time.timestamp())
         await self.bot.config_manager.save()
+        print(self.bot.config_manager.last_updated)
 
 
 async def setup(bot: 'MangaReleaseBot'):

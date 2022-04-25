@@ -1,6 +1,7 @@
-from .guya import Guya
-from .base import BaseSource
 from typing import TYPE_CHECKING
+
+from .base import BaseSource
+from .guya import Danke, Guya, Hachirumi, MahouShoujoBu
 
 if TYPE_CHECKING:
     from ..bot import MangaReleaseBot

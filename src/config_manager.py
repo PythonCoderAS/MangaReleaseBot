@@ -10,8 +10,8 @@ class ConfigManager:
 
     def __init__(self, data: dict):
         self.data = data
-        self.changed = []
-        self.deleted = []
+        self.changed = set()
+        self.deleted = set()
 
     @classmethod
     async def get(cls):
@@ -35,12 +35,13 @@ class ConfigManager:
             self.data[key] = Metadata(key=key, value=value)
         else:
             self.data[key].value = value
-        self.changed.append(key)
+        self.changed.add(key)
 
     def __delattr__(self, item: str):
-        self.deleted.append(self.data[item])
+        self.deleted.add(self.data[item])
         del self.data[item]
 
     async def save(self):
+        print(self.changed, self.deleted)
         await gather(*[self.data[item].save() for item in self.changed])
         await gather(*[item.delete() for item in self.deleted])
