@@ -42,6 +42,7 @@ class BaseSource(ABC):
         item_id = await self.get_id(url)
         if item_id is None:
             await ctx.send(f"Valid manga not found for the {self.source_name} source.")
+            return
         return MangaEntry(item_id=item_id)
 
     async def remove_item(self, ctx: Context, entry: MangaEntry):

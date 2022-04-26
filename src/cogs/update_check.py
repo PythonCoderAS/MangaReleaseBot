@@ -56,7 +56,7 @@ class UpdateChecker(Cog):
         thread_data = ThreadData(thread_id=thread.id, entry=manga_entry)
         await thread_data.save()
 
-    @loop(minutes=10)
+    @loop(minutes=10, reconnect=False)
     async def update_check(self):
         await self.bot.wait_until_ready()
         print("Starting update check...")

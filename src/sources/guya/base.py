@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Dict, List, Optional, Sequence
 
 from discord import Embed
-from guyamoe_api_types import Chapter, Series
+from guyamoe_api_types import AllSeries, Chapter, Series
 
 from ..base import BaseSource, UpdateEntry
 from ...models import MangaEntry
@@ -25,13 +25,15 @@ def get_preferred_chapter_data(chapter_data: Chapter, preferred_groups: list[str
 class Guya(BaseSource):
 
     source_name = 'guya.moe'
-    url_regex = re.compile(r'^https://guya.(?:cubari.)?moe/read/manga/([\w-]+)', re.IGNORECASE)
+    url_regex = re.compile(r'^https://guya.(?:cubari.)?moe/read/manga/([\w-]+|\*)', re.IGNORECASE)
 
     base_endpoint = 'https://guya.moe/api'
     website_endpoint = 'https://guya.moe'
 
     async def get_id(self, url: str) -> Optional[str]:
         slug = self.url_regex.search(url).group(1)
+        if slug == '*':
+            return slug
         async with self.bot.session.get(f'{self.base_endpoint}/series/{slug}') as resp:
             if resp.status == 404:
                 return
@@ -40,14 +42,23 @@ class Guya(BaseSource):
 
     async def check_updates(self, last_update: datetime, id_data: Dict[str, Sequence[MangaEntry]]) -> List[UpdateEntry]:
         updates = []
+        last_updated_int = int(last_update.timestamp())
+        if "*" in id_data:
+            async with self.bot.session.get(f'{self.base_endpoint}/get_all_series') as resp:
+                resp.raise_for_status()
+                data: AllSeries = await resp.json()
+            star_data = id_data.pop("*")
+            for item in data.values():
+                if item['last_updated'] > last_updated_int:
+                    id_data[item['slug']] = star_data
         for slug in id_data.keys():
             async with self.bot.session.get(f'{self.base_endpoint}/series/{slug}') as resp:
                 resp.raise_for_status()
                 data: Series = await resp.json()
             for chapter_num, chapter in data['chapters'].items():
                 group_pages, group_release_date, group_id = get_preferred_chapter_data(chapter, data['preferred_sort'])
-                print(group_release_date, last_update.timestamp(), group_release_date >= last_update.timestamp())
-                if group_release_date >= last_update.timestamp():
+                print(group_release_date, last_updated_int, group_release_date >= last_updated_int)
+                if group_release_date >= last_updated_int:
                     embed = Embed(title=f"New chapter released! {data['title']} Chapter {chapter_num}",
                                   url=f"{self.base_endpoint}/read/manga/{slug}/{chapter_num}",
                                   timestamp=datetime.fromtimestamp(group_release_date))

@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import Optional, TYPE_CHECKING, Union
 
 from discord import Interaction, InteractionType, Role, TextChannel, User, Thread
-from discord.app_commands import Group
+from discord.app_commands import AppCommandThread, Group
 from discord.ext.commands import Cog, Context
 from tortoise.functions import Count
 
@@ -67,7 +67,7 @@ class Manga(Cog):
             await ctx.send(f"Could not find a source for {url}.")
 
     @manga.command()
-    async def subscribe(self, interaction: Interaction, id: Optional[int] = None, thread: Optional[Thread] = None,
+    async def subscribe(self, interaction: Interaction, id: Optional[int] = None, thread: Optional[AppCommandThread] = None,
                         target: Optional[Union[User, Role]] = None):
         """Subscribe to a specific manga entry."""
         ctx = await Context.from_interaction(interaction)
@@ -105,12 +105,12 @@ class Manga(Cog):
         if target is None:
             target = ctx.author
         if target != ctx.author:
-            if not ctx.channel.permissions_for(ctx.author).manage_threads or ctx.author.id != manga_entry.creator_id:
+            if not ctx.channel.permissions_for(ctx.author).manage_threads and ctx.author.id != manga_entry.creator_id:
                 return await ctx.send("You don't have permission to add other people or roles as targets.")
         await self.subscribe_user(interaction, id, target)
 
     @manga.command()
-    async def unsubscribe(self, interaction: Interaction, id: Optional[int] = None, thread: Optional[Thread] = None,
+    async def unsubscribe(self, interaction: Interaction, id: Optional[int] = None, thread: Optional[AppCommandThread] = None,
                         target: Optional[Union[User, Role]] = None):
         """Unsubscribe from a specific manga entry."""
         ctx = await Context.from_interaction(interaction)
@@ -148,7 +148,7 @@ class Manga(Cog):
         if target is None:
             target = ctx.author
         if target != ctx.author:
-            if not ctx.channel.permissions_for(ctx.author).manage_threads or ctx.author.id != manga_entry.creator_id:
+            if not ctx.channel.permissions_for(ctx.author).manage_threads and ctx.author.id != manga_entry.creator_id:
                 return await ctx.send("You don't have permission to remove other people or roles as targets.")
         await self.unsubscribe_user(interaction, id, target)
 
