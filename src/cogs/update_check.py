@@ -50,7 +50,8 @@ class UpdateChecker(Cog):
                 await thread.send(f"Adding role: <@&{ping.mention_id}>")
             else:
                 await thread.add_user(Object(ping.mention_id))
-        action_message = await thread.send("**__Thread Actions__**", view=SubscribeOrUnsubscribe(manga_entry.id))
+        action_message = await thread.send(f"Manga Entry ID: **{manga_entry.id}**\n\n**__Thread Actions__**",
+                                           view=SubscribeOrUnsubscribe(manga_entry.id))
         if thread.permissions_for(self.bot.get_guild(manga_entry.guild_id).me).manage_messages:
             await action_message.pin()
         thread_data = ThreadData(thread_id=thread.id, entry=manga_entry)
