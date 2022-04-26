@@ -15,6 +15,7 @@ class MangaReleaseBot(Bot):
         self.config_manager: Optional[ConfigManager] = None
         self.session: Optional[ClientSession] = None
         intents = Intents.default()
+        intents.members = True
         super().__init__(when_mentioned, intents=intents)
         self.source_map = make_source_map(self)
 
