@@ -17,6 +17,7 @@ class MangaEntry(Model):
     message_channel_first = BooleanField(null=False, default=False)
     private_thread = BooleanField(null=False, default=False)
     deleted = DatetimeField(null=True)
+    paused = DatetimeField(null=True)
 
     pings: ReverseRelation["Ping"]
     threads: ReverseRelation["ThreadData"]

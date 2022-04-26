@@ -63,7 +63,7 @@ class UpdateChecker(Cog):
         print("Starting update check...")
         print(self.bot.config_manager.last_updated)
         cur_time = datetime.now(UTC)
-        first_filter_round = await MangaEntry.all().distinct().filter(deleted=None).values_list("guild_id",
+        first_filter_round = await MangaEntry.all().distinct().filter(deleted=None, paused=None).values_list("guild_id",
                                                                                                 "channel_id")
         ids_to_check = []
         for guild_id, channel_id in first_filter_round:
@@ -75,13 +75,13 @@ class UpdateChecker(Cog):
                 if channel:
                     ids_to_check.append(channel_id)
         print("First round: ", ids_to_check)
-        second_filter_round: List[str] = await MangaEntry.all().distinct().filter(deleted=None).values_list("source_id",
+        second_filter_round: List[str] = await MangaEntry.all().distinct().filter(deleted=None, paused=None).values_list("source_id",
                                                                                                             flat=True)
         tasks = []
         for source_id in second_filter_round:
             source: BaseSource = self.bot.source_map.get(source_id, None)
             if source:
-                items = await MangaEntry.filter(source_id=source_id, channel_id__in=ids_to_check, deleted=None).all()
+                items = await MangaEntry.filter(source_id=source_id, channel_id__in=ids_to_check, deleted=None, paused=None).all()
                 by_item_id = defaultdict(list)
                 for item in items:
                     by_item_id[item.item_id].append(item)
