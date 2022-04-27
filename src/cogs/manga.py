@@ -218,6 +218,38 @@ class Manga(Cog):
                 id = manga_entry.id
         await self.unpause_entry(interaction, id)
 
+    @manga.command()
+    async def customize(self, interaction: Interaction, id: Optional[int] = None,
+                            thread: Optional[AppCommandThread] = None,):
+        ctx = await Context.from_interaction(interaction)
+        await ctx.defer()
+        if thread and id:
+            obj = await ThreadData.get_or_none(thread_id=thread.id)
+            if obj is None:
+                return await ctx.send(
+                    "This thread was not created by the bot. Please use this command in a thread created by the bot.")
+            manga_entry = await MangaEntry.get_or_none(id=id)
+            if manga_entry is None:
+                return await ctx.send("This entry does not exist.")
+            if (await obj.entry).id != id:
+                return await ctx.send("Linked manga entry ID mistmatch. Please specify either `thread` or `id` but not both.")
+        elif thread:
+            obj = await ThreadData.get_or_none(thread_id=thread.id)
+            if obj is None:
+                return await ctx.send(
+                    "This thread was not created by the bot. Please use this command in a thread created by the bot.")
+            id = (await obj.entry).id
+        if id is None:
+            thread_id = ctx.channel.id
+            obj = await ThreadData.get_or_none(thread_id=thread_id)
+            if obj is None:
+                return await ctx.send(
+                    "This thread was not created by the bot. Please use this command in a thread created by the bot.")
+            else:
+                manga_entry = await obj.entry
+                id = manga_entry.id
+        await self.customize_entry(interaction, id)
+
     async def subscribe_user(self, interaction: Interaction, item_id: int, target: Union[User, Role]):
         ping_data = {"item_id": item_id, "mention_id": target.id, "is_role": type(target) is Role}
         ping_obj, ping_created = await Ping.get_or_create({}, **ping_data)
@@ -293,11 +325,22 @@ class Manga(Cog):
         await manga_entry.save()
         await interaction.followup.send(f"Unpaused entry {item_id}.")
 
+    async def customize_entry(self, interaction: Interaction, item_id: int):
+        manga_entry = await MangaEntry.get(id=item_id)
+        if manga_entry is None:
+            return await interaction.followup.send("This entry does not exist.")
+        member = interaction.guild.get_member(interaction.user.id)
+        if not interaction.channel.permissions_for(member).manage_threads and interaction.user.id != \
+                manga_entry.creator_id:
+            return await interaction.followup.send("You don't have permission to customize manga entries.")
+        modal = await interaction.client.source_map[manga_entry.source_id].customize(manga_entry)
+        await interaction.response.send_modal(modal)
+
     async def process_button(self, interaction: Interaction):
         custom_id = interaction.data["custom_id"]
         if custom_id is None:
             return
-        elif custom_id.startswith("subscribe_id_"):
+        if custom_id.startswith("subscribe_id_"):
             await interaction.response.defer()
             await self.subscribe_user(interaction, int(custom_id[13:]), interaction.user)
         elif custom_id.startswith("unsubscribe_id_"):
@@ -309,6 +352,8 @@ class Manga(Cog):
         elif custom_id.startswith("unpause_id_"):
             await interaction.response.defer()
             await self.unpause_entry(interaction, custom_id[11:])
+        elif custom_id.startswith("customize_id_"):
+            await self.customize_entry(interaction, custom_id[13:])
 
     @Cog.listener()
     async def on_interaction(self, interaction: Interaction):

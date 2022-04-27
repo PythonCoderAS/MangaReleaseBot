@@ -11,7 +11,7 @@ from discord.ext.tasks import loop
 from ..models import MangaEntry, ThreadData
 from ..sources import BaseSource
 from ..sources.base import UpdateEntry
-from ..views.sub_unsub import SubscribeOrUnsubscribe
+from ..views.thread_actions import ThreadActions
 
 if TYPE_CHECKING:
     from ..bot import MangaReleaseBot
@@ -51,7 +51,7 @@ class UpdateChecker(Cog):
             else:
                 await thread.add_user(Object(ping.mention_id))
         action_message = await thread.send(f"Manga Entry ID: **{manga_entry.id}**\n\n**__Thread Actions__**",
-                                           view=SubscribeOrUnsubscribe(manga_entry.id))
+                                           view=ThreadActions(manga_entry.id))
         if thread.permissions_for(self.bot.get_guild(manga_entry.guild_id).me).manage_messages:
             await action_message.pin()
         thread_data = ThreadData(thread_id=thread.id, entry=manga_entry)
