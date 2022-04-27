@@ -25,7 +25,9 @@ class MangaReleaseBot(Bot):
         await init()
         self.config_manager = await ConfigManager.get()
         self.session = ClientSession()
-        self.hondana = Client(session=self.session, username=mangadex_username, password=mangadex_password)
+        self.hondana = Client(
+            session=self.session, username=mangadex_username, password=mangadex_password
+        )
         await self.load_extension("jishaku")
         await self.load_extension("..cogs.manga", package=__name__)
         await self.load_extension("..cogs.update_check", package=__name__)

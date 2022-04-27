@@ -23,13 +23,20 @@ class UpdateEntry:
 
 
 class BaseModal(ABC, Modal, title="Apply Customizations"):
-
-    def __init__(self, entry: MangaEntry, source: "BaseSource", *, timeout: Optional[float] = None):
+    def __init__(
+        self,
+        entry: MangaEntry,
+        source: "BaseSource",
+        *,
+        timeout: Optional[float] = None,
+    ):
         super().__init__(timeout=timeout)
         self.entry = entry
         self.source = source
 
-    async def get_customization(self, interaction: Interaction) -> Optional[Dict[str, Any]]:
+    async def get_customization(
+        self, interaction: Interaction
+    ) -> Optional[Dict[str, Any]]:
         """Get a customization dictionary for storage.
 
         :param interaction: The interaction object created when the modal is submitted.
@@ -59,17 +66,25 @@ class BaseModal(ABC, Modal, title="Apply Customizations"):
         await interaction.response.defer()
         customizations = await self.get_customization(interaction)
         if customizations is None:
-            await interaction.followup.send(f"No customizations were applied to entry #{self.entry.id}.")
+            await interaction.followup.send(
+                f"No customizations were applied to entry #{self.entry.id}."
+            )
         elif customizations == {}:
-            await interaction.followup.send(f"Customizations for entry #{self.entry.id} were reset to default.")
+            await interaction.followup.send(
+                f"Customizations for entry #{self.entry.id} were reset to default."
+            )
             self.entry.extra_config = self.source.default_customizations
             await self.entry.save()
         else:
             message = f"The following customizations were successfully saved for entry #{self.entry.id}: "
             if len(message + f"```py\n{customizations}\n```") <= 2000:
-                await interaction.followup.send(message + f"```py\n{customizations}\n```")
+                await interaction.followup.send(
+                    message + f"```py\n{customizations}\n```"
+                )
             else:
-                attachment = File(str(customizations), filename=f"customizations-{self.entry.id}.py")
+                attachment = File(
+                    str(customizations), filename=f"customizations-{self.entry.id}.py"
+                )
                 await interaction.followup.send(message.rstrip(), file=attachment)
             self.entry.extra_config = customizations
             await self.entry.save()
@@ -114,7 +129,12 @@ class BaseSource(ABC):
 
     async def remove_item(self, ctx: Context, entry: MangaEntry):
         """Remove an item from being notified."""
-        items = await entry.pings.all().annotate(count=Count("id")).group_by("is_role").values("is_role", "count")
+        items = (
+            await entry.pings.all()
+            .annotate(count=Count("id"))
+            .group_by("is_role")
+            .values("is_role", "count")
+        )
         role = user = 0
         for item in items:
             if item["is_role"]:
@@ -126,6 +146,8 @@ class BaseSource(ABC):
         await ctx.send(message)
 
     @abstractmethod
-    async def check_updates(self, last_update: datetime, data: Dict[str, Sequence[MangaEntry]]) -> List[UpdateEntry]:
+    async def check_updates(
+        self, last_update: datetime, data: Dict[str, Sequence[MangaEntry]]
+    ) -> List[UpdateEntry]:
         """Check for updates and return a list of UpdateEntry objects."""
         raise NotImplementedError

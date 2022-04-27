@@ -5,9 +5,17 @@ from discord.ui import Button, View, button
 
 
 class Confirm(View):
-    def __init__(self, confirm_callback: Callable[["Confirm", Interaction, Button], Coroutine[None, None, Any]],
-                 deny_callback: Optional[Callable[["Confirm", Interaction, Button], Coroutine[None, None, Any]]] = None,
-                 *, timeout: Optional[float] = 180.0):
+    def __init__(
+        self,
+        confirm_callback: Callable[
+            ["Confirm", Interaction, Button], Coroutine[None, None, Any]
+        ],
+        deny_callback: Optional[
+            Callable[["Confirm", Interaction, Button], Coroutine[None, None, Any]]
+        ] = None,
+        *,
+        timeout: Optional[float] = 180.0
+    ):
         super().__init__(timeout=timeout)
         self.confirm_callback = confirm_callback
         self.deny_callback = deny_callback

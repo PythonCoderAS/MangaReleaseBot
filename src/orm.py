@@ -5,14 +5,14 @@ from .models import MangaEntry, Metadata, Ping, ThreadData  # noqa
 TORTOISE_ORM = {
     "connections": {
         "default": {
-            'engine': 'tortoise.backends.asyncpg',
+            "engine": "tortoise.backends.asyncpg",
             "credentials": {
                 "user": "mangareleasebot",
                 "password": "mangareleasebot",
                 "database": "mangareleasebot",
                 "host": "localhost",
-                "port": 5432
-            }
+                "port": 5432,
+            },
         },
     },
     "apps": {
