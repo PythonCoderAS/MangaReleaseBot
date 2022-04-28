@@ -196,7 +196,12 @@ class MangaDex(BaseSource):
                 resource_type = "*"
             resource_types[resource_type][resource_id] = value
         async for chapter in self.all_chapters(last_update):
-            title = f"{chapter.manga.title} Chapter {chapter.chapter or chapter.title or 'Oneshot'}"
+            title = chapter.manga.title
+            suffix = f" Chapter {chapter.chapter or chapter.title or 'Oneshot'}"
+            suffix_len = len(suffix)
+            if len(title) + suffix_len > 100: # Max thread title length is 100.
+                max_len = 100 - suffix_len
+                title = title[:max_len - 1] + "…"
             if "*" in resource_types:
                 for entry in resource_types["*"]["*"]:
                     if self.filter_chapter_entry(chapter, entry):
