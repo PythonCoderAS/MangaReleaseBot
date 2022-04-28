@@ -1,9 +1,11 @@
 """Methods for managing configuration values via a database."""
+import logging
 from asyncio import gather
 from typing import Any, Optional
 
 from .models import Metadata
 
+logger = logging.getLogger(__name__)
 
 class ConfigManager:
     last_updated: int
@@ -22,7 +24,6 @@ class ConfigManager:
         return cls(data)
 
     def __getattr__(self, item: str) -> Optional[Any]:
-        print(item)
         try:
             return self.data[item].value
         except KeyError:
@@ -42,6 +43,6 @@ class ConfigManager:
         del self.data[item]
 
     async def save(self):
-        print(self.changed, self.deleted)
+        logger.debug("Saving %s, Deleting %s", self.changed, self.deleted)
         await gather(*[self.data[item].save() for item in self.changed])
         await gather(*[item.delete() for item in self.deleted])

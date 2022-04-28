@@ -1,6 +1,6 @@
 import re
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import (
     Any,
     AsyncGenerator,
@@ -181,7 +181,7 @@ class MangaDex(BaseSource):
             if len(data.items) == 0:
                 return
             else:
-                start_time = data.items[-1].created_at
+                start_time = data.items[-1].created_at + timedelta(seconds=1)
 
     async def check_updates(
         self, last_update: datetime, data: Dict[str, Sequence[MangaEntry]]

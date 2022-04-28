@@ -1,3 +1,4 @@
+import logging
 from asyncio import create_task, gather
 from collections import defaultdict
 from datetime import datetime
@@ -17,7 +18,7 @@ if TYPE_CHECKING:
     from ..bot import MangaReleaseBot
 
 UTC = ZoneInfo("UTC")
-
+logger = logging.getLogger(__name__)
 
 class UpdateChecker(Cog):
     @property
@@ -73,8 +74,7 @@ class UpdateChecker(Cog):
     @loop(minutes=10, reconnect=False)
     async def update_check(self):
         await self.bot.wait_until_ready()
-        print("Starting update check...")
-        print(self.bot.config_manager.last_updated)
+        logger.debug("Starting update check (last checked at %s)", self.last_updated)
         cur_time = datetime.now(UTC)
         first_filter_round = (
             await MangaEntry.all()
@@ -85,13 +85,10 @@ class UpdateChecker(Cog):
         ids_to_check = []
         for guild_id, channel_id in first_filter_round:
             guild = self.bot.get_guild(guild_id)
-            print(guild_id, channel_id, guild)
             if guild:
                 channel = guild.get_channel(channel_id)
-                print(channel)
                 if channel:
                     ids_to_check.append(channel_id)
-        print("First round: ", ids_to_check)
         second_filter_round: List[str] = (
             await MangaEntry.all()
             .distinct()
@@ -111,21 +108,21 @@ class UpdateChecker(Cog):
                 by_item_id = defaultdict(list)
                 for item in items:
                     by_item_id[item.item_id].append(item)
-                print(f"Second round for {source_id}:", by_item_id)
+                logger.debug("Providing %s to %s", items, type(source).__name__)
                 tasks.append(
                     create_task(source.check_updates(self.last_updated, by_item_id))
                 )
+            logger.debug("No source object found for %s", source_id)
         entries: List[List[UpdateEntry]] = await gather(*tasks)
-        print("Got entries: ", entries)
+        logger.debug("Got entries: %s", entries)
         entry_tasks = []
         for top_layer in entries:
             for entry in top_layer:
-                print(f"Found update for {entry.entry.source_id}:{entry.entry.item_id}")
+                logger.debug("Found entry: %s", entry)
                 entry_tasks.append(create_task(self.make_entry(entry)))
         await gather(*entry_tasks)
         self.bot.config_manager.last_updated = int(cur_time.timestamp())
         await self.bot.config_manager.save()
-        print(self.bot.config_manager.last_updated)
 
 
 async def setup(bot: "MangaReleaseBot"):

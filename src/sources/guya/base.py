@@ -69,11 +69,6 @@ class Guya(BaseSource):
                 group_pages, group_release_date, group_id = get_preferred_chapter_data(
                     chapter, data["preferred_sort"]
                 )
-                print(
-                    group_release_date,
-                    last_updated_int,
-                    group_release_date >= last_updated_int,
-                )
                 if group_release_date >= last_updated_int:
                     embed = Embed(
                         title=f"New chapter released! {data['title']} Chapter {chapter_num}",
