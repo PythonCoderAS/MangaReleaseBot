@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List, TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
-from discord import ChannelType, Object, TextChannel
+from discord import ChannelType, Object, TextChannel, Thread
 from discord.ext.commands import Cog
 from discord.ext.tasks import loop
 
@@ -71,6 +71,39 @@ class UpdateChecker(Cog):
         thread_data = ThreadData(thread_id=thread.id, entry=manga_entry)
         await thread_data.save()
 
+    async def archive_thread(self, thread: Thread):
+        # Precondition: Thread is owned by bot.
+        await thread.send("Archiving thread prematurely to make space for more threads.")
+        await thread.edit(archived=True, locked=False, reason="Archiving thread to make space for more threads.")
+
+    async def process_guild(self, tasks: List[UpdateEntry]):
+        # Precondition: len(tasks) > 0
+        first = tasks[0]
+        guild = self.bot.get_guild(first.entry.guild_id)
+        active_threads = sum(len(channel.threads) for channel in guild.text_channels)
+        if active_threads + len(tasks) > 1000: # Max 1k threads per guild
+            cleaned_requires = active_threads + len(tasks) - 1000
+            logger.debug("Too many threads, attempting to clean up %s threads", cleaned_requires)
+            my_threads = []
+            for channel in guild.text_channels:
+                for thread in channel.threads:
+                    if thread.owner_id == self.bot.user.id:
+                        my_threads.append(thread)
+            my_threads.sort(key=lambda thread: (thread.last_message_id, thread.created_at))
+            if len(my_threads) < cleaned_requires:
+                logger.debug("Not enough threads to clean up, cleanimg %s threads and skipping %s threads.", len(my_threads), cleaned_requires - len(my_threads))
+                worked_tasks = tasks[:len(my_threads)]
+                threads_to_clean = my_threads
+                await gather(*[self.archive_thread(thread) for thread in threads_to_clean])
+                await gather(*[self.make_entry(task) for task in worked_tasks])
+                return
+            else:
+                logger.debug("Found enough threads to clean up, cleaning up %s threads", cleaned_requires)
+                threads_to_clean = my_threads[:cleaned_requires]
+                await gather(*[self.archive_thread(thread) for thread in threads_to_clean])
+        await gather(*[self.make_entry(task) for task in tasks])
+
+
     @loop(minutes=10, reconnect=False)
     async def update_check(self):
         await self.bot.wait_until_ready()
@@ -115,12 +148,12 @@ class UpdateChecker(Cog):
             logger.debug("No source object found for %s", source_id)
         entries: List[List[UpdateEntry]] = await gather(*tasks)
         logger.debug("Got entries: %s", entries)
-        entry_tasks = []
+        entry_tasks: dict[str, list[UpdateEntry]] = defaultdict(list)
         for top_layer in entries:
             for entry in top_layer:
                 logger.debug("Found entry: %s", entry)
-                entry_tasks.append(create_task(self.make_entry(entry)))
-        await gather(*entry_tasks)
+                entry_tasks[entry.entry.guild_id].append(entry)
+        await gather(*[self.process_guild(item) for item in entry_tasks.values()])
         self.bot.config_manager.last_updated = int(cur_time.timestamp())
         await self.bot.config_manager.save()
 
