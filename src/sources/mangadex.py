@@ -101,7 +101,7 @@ class MangaDex(BaseSource):
         customizations: Optional[MangaDexCustomizations] = entry.extra_config
         if not customizations:
             return True
-        if customizations["external_links"] and chapter.external_url:
+        if not customizations["external_links"] and chapter.external_url:
             return False
         if (
             customizations["languages"]
