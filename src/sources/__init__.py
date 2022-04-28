@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from .base import BaseSource
 from .guya import Danke, Guya, Hachirumi, MahouShoujoBu
+from .mangadex import MangaDex
 
 if TYPE_CHECKING:
     from ..bot import MangaReleaseBot
