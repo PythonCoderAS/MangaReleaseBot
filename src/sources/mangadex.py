@@ -202,6 +202,7 @@ class MangaDex(BaseSource):
             if len(title) + suffix_len > 100: # Max thread title length is 100.
                 max_len = 100 - suffix_len
                 title = title[:max_len - 1] + "…"
+            title += suffix
             if "*" in resource_types:
                 for entry in resource_types["*"]["*"]:
                     if self.filter_chapter_entry(chapter, entry):
