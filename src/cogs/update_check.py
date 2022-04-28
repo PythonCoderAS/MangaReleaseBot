@@ -162,7 +162,7 @@ class UpdateChecker(Cog):
     async def stop(self, ctx: Context):
         """Safely stop the update checker after its next iteration."""
         self.update_check.stop()
-        await ctx.send("Stopped update checker.")
+        await ctx.send("Queued update checker for stopping.")
 
 async def setup(bot: "MangaReleaseBot"):
     await bot.add_cog(UpdateChecker(bot))
