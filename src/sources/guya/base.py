@@ -72,7 +72,7 @@ class Guya(BaseSource):
                 if group_release_date >= last_updated_int:
                     embed = Embed(
                         title=f"New chapter released! {data['title']} Chapter {chapter_num}",
-                        url=f"{self.base_endpoint}/read/manga/{slug}/{chapter_num}",
+                        url=f"{self.website_endpoint}/read/manga/{slug}/{chapter_num}",
                         timestamp=datetime.fromtimestamp(group_release_date),
                     )
                     embed.set_image(
