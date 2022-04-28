@@ -65,7 +65,7 @@ class MangaDex(BaseSource):
 
     source_name = "MangaDex"
     url_regex = re.compile(
-        r"^http://mangadex\.org/(title|user|group|manga|author)/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{"
+        r"^https?://mangadex\.org/(title|user|group|manga|author)/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{"
         r"4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}|\*)"
     )
 
