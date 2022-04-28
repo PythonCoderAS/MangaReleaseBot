@@ -48,7 +48,7 @@ def get_resource_method(
         raise ValueError(f"Unknown resource: {resource}")
 
 
-class MangaDexCustomizations(TypedDict, total=False):
+class MangaDexCustomizations(TypedDict, total=True):
     languages: List[str]
     whitelisted_groups: List[str]
     blacklisted_groups: List[str]
@@ -70,6 +70,14 @@ class MangaDex(BaseSource):
 
     default_customizations: ClassVar[MangaDexCustomizations] = {
         "languages": ["en"],
+        "whitelisted_groups": [],
+        "blacklisted_groups": [],
+        "whitelisted_users": [],
+        "blacklisted_users": [],
+        "whitelisted_content_ratings": [],
+        "blacklisted_content_ratings": [],
+        "whitelisted_tags": [],
+        "blacklisted_tags": [],
         "external_links": False,
     }
 

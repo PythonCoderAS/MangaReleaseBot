@@ -31,8 +31,8 @@ class ThreadActions(View):
         )
         self.add_item(
             Button(
-                style=ButtonStyle.danger,
-                label="Unsubscribe",
+                style=ButtonStyle.success,
+                label="Unpause",
                 custom_id="unpause_id_" + str(id),
                 row=1,
             )
