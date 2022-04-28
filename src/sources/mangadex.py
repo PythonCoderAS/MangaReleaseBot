@@ -65,8 +65,7 @@ class MangaDex(BaseSource):
 
     source_name = "MangaDex"
     url_regex = re.compile(
-        r"^https?://mangadex\.org/(title|user|group|manga|author)/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{"
-        r"4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}|\*)"
+        r"^https?://mangadex\.org/(title|user|group|manga|author)/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}|\*)"
     )
 
     default_customizations: ClassVar[MangaDexCustomizations] = {
@@ -82,6 +81,8 @@ class MangaDex(BaseSource):
         if resource_type == "title":
             resource_type = "manga"
         resource_id = match.group(2)
+        if resource_id == "*":
+            return "*:*"
         try:
             await get_resource_method(self.bot.hondana, resource_type)(resource_id)
         except NotFound:
