@@ -6,7 +6,7 @@ from typing import List, TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
 from discord import ChannelType, Object, TextChannel, Thread
-from discord.ext.commands import Cog
+from discord.ext.commands import Cog, Context, command, is_owner
 from discord.ext.tasks import loop
 
 from ..models import MangaEntry, ThreadData
@@ -157,6 +157,12 @@ class UpdateChecker(Cog):
         self.bot.config_manager.last_updated = int(cur_time.timestamp())
         await self.bot.config_manager.save()
 
+    @command()
+    @is_owner()
+    async def stop(self, ctx: Context):
+        """Safely stop the update checker after its next iteration."""
+        self.update_check.stop()
+        await ctx.send("Stopped update checker.")
 
 async def setup(bot: "MangaReleaseBot"):
     await bot.add_cog(UpdateChecker(bot))
