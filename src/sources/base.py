@@ -113,7 +113,7 @@ class BaseSource(ABC):
         if item_id is None:
             await ctx.send(f"Valid manga not found for the {self.source_name} source.")
             return
-        return MangaEntry(item_id=item_id, metadata=self.default_metadata)
+        return MangaEntry(item_id=item_id, extra_config=self.default_customizations)
 
     async def customize(self, entry: MangaEntry) -> BaseModal:
         """Return a modal for further customization or raise :exception:`NotImplementedError`
