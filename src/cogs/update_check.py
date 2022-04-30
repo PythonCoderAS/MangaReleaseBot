@@ -102,7 +102,8 @@ class UpdateChecker(Cog):
             else:
                 logger.debug("Found enough threads to clean up, cleaning up %s threads", cleaned_requires)
                 threads_to_clean = my_threads[:cleaned_requires]
-                await gather(*[self.archive_thread(thread) for thread in threads_to_clean])
+                for thread in threads_to_clean:
+                    await self.archive_thread(thread)
         await gather(*[self.make_entry(task) for task in tasks])
 
 
@@ -147,7 +148,8 @@ class UpdateChecker(Cog):
                 tasks.append(
                     create_task(source.check_updates(self.last_updated, by_item_id))
                 )
-            logger.debug("No source object found for %s", source_id)
+            else:
+                logger.debug("No source object found for %s", source_id)
         entries: List[List[UpdateEntry]] = await gather(*tasks)
         logger.debug("Got entries: %s", entries)
         entry_tasks: dict[str, list[UpdateEntry]] = defaultdict(list)
