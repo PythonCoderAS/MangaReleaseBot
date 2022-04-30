@@ -89,9 +89,11 @@ class UpdateChecker(Cog):
                 for thread in channel.threads:
                     if thread.owner_id == self.bot.user.id:
                         my_threads.append(thread)
-            my_threads.sort(key=lambda thread: (thread.last_message_id, thread.created_at))
+            my_threads.sort(key=lambda thread: (thread.last_message_id or 0, thread.created_at))
+            # If there is no last message, it's probably an old thread, and so we aggressively target these first.
+            # Has to be `or 0` because you cannot compare an int and None.
             if len(my_threads) < cleaned_requires:
-                logger.debug("Not enough threads to clean up, cleanimg %s threads and skipping %s threads.", len(my_threads), cleaned_requires - len(my_threads))
+                logger.debug("Not enough threads to clean up, cleaning %s threads and skipping %s threads.", len(my_threads), cleaned_requires - len(my_threads))
                 worked_tasks = tasks[:len(my_threads)]
                 threads_to_clean = my_threads
                 await gather(*[self.archive_thread(thread) for thread in threads_to_clean])
