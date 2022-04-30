@@ -31,6 +31,7 @@ class Utils(Cog):
             await thread.send(f"Cleaning up thread due to cleanup command (executed by {interaction.user.mention}).",
                               allowed_mentions=AllowedMentions.none())
             await thread.edit(archived=True, locked=False)
+        await interaction.followup.send("Done.")
 
 
 async def setup(bot: "MangaReleaseBot"):
