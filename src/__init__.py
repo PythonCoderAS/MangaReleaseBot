@@ -8,3 +8,6 @@ if getenv("DEBUG", "0") == "1":
     handler.setLevel(logging.DEBUG)
     handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(message)s"))
     logger.addHandler(handler)
+    discord = logging.getLogger("discord")
+    discord.setLevel(logging.WARNING) # We want discord warns
+    discord.addHandler(handler)
