@@ -31,6 +31,7 @@ class MangaReleaseBot(Bot):
         await self.load_extension("jishaku")
         await self.load_extension("..cogs.manga", package=__name__)
         await self.load_extension("..cogs.update_check", package=__name__)
+        await self.load_extension("..cogs.utils", package=__name__)
 
     async def close(self) -> None:
         await self.config_manager.save()
