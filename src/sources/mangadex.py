@@ -76,14 +76,14 @@ class MangadexModal(BaseModal):
             label="Config",
             style=TextStyle.paragraph,
             placeholder="Config JSON object",
-            default=dumps(entry.extra_config),
+            default=dumps(entry.extra_config, sort_keys=True, indent=4),
             required=False,
         )
         for name, item in vars(self).items():
             if isinstance(item, TextInput):
                 self.add_item(item)
 
-    def get_customization(self, interaction: Interaction) -> MangaDexCustomizations:
+    async def get_customization(self, interaction: Interaction) -> MangaDexCustomizations:
         return loads(self.config.value)
 
 
