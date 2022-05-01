@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 from aiohttp import ClientSession
@@ -24,6 +25,9 @@ from .orm import init
 from .sources import make_source_map
 
 
+logger = logging.getLogger(__name__)
+
+
 class MangaReleaseBot(Bot):
     def __init__(self):
         self.config_manager: Optional[ConfigManager] = None
@@ -37,6 +41,7 @@ class MangaReleaseBot(Bot):
 
         @self.tree.error
         async def on_error(interaction: Interaction, exception: AppCommandError):
+            logger.debug("Error on tree command %s", interaction.command, exc_info=exception)
             if isinstance(exception, AppCommandInvokeError):
                 if isinstance(exception.original, BaseError):
                     if interaction.response.is_done():
@@ -69,6 +74,7 @@ class MangaReleaseBot(Bot):
         return await super().close()
 
     async def on_command_error(self, context: Context, exception: CommandError, /):
+        logger.debug("Error on ext command command %s", getattr(context.command, "name", None), exc_info=exception)
         if isinstance(exception, ExtCommandInvokeError):
             if isinstance(exception.original, BaseError):
                 return await context.send(exception.original.args[0])
