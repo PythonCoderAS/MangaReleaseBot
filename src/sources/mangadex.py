@@ -76,7 +76,7 @@ class MangadexModal(BaseModal):
             label="Config",
             style=TextStyle.paragraph,
             placeholder="Config JSON object",
-            value=dumps(entry.extra_config),
+            default=dumps(entry.extra_config),
             required=False
         )
         for name, item in vars(self).items():
