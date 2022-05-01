@@ -4,4 +4,6 @@ message_mapping = {
     3: "Bot does not the permissions to execute this command.",
     4: "Thread <#{thread_id}> was not created by the bot. Please use this command in a thread created by the bot.",
     5: "Cannot specify both id and thread. Use either `thread` or `id` but not both.",
+    6: "Invalid configuration data.",
+    7: "Invalid JSON file.",
 }

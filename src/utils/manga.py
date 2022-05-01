@@ -1,5 +1,7 @@
-from typing import Optional
+from json import dumps
+from typing import Any, Optional
 
+from discord import File
 from discord.abc import Snowflake
 
 from .._patched.types.discord import Interaction
@@ -39,3 +41,16 @@ async def resolve_id_from_thread_or_id(id: int, thread: Snowflake) -> int:
             raise Error(4, thread_id=thread.id)
         return obj.entry_id
     raise AssertionError("Should not reach this point.")
+
+
+async def save_config(entry: MangaEntry, config: Any, interaction: Interaction):
+    message = (
+        f"The following customizations were successfully saved for entry #{entry.id}: "
+    )
+    if len(message + f"```py\n{config}\n```") <= 2000:
+        await interaction.followup.send(message + f"```py\n{config}\n```")
+    else:
+        attachment = File(dumps(config), filename=f"customizations-{entry.id}.json")
+        await interaction.followup.send(message.rstrip(), file=attachment)
+    entry.extra_config = config
+    await entry.save()

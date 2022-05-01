@@ -8,6 +8,7 @@ from discord.ui import Modal
 
 from .._patched.types.discord import Context, Interaction
 from ..models import MangaEntry
+from ..utils.manga import save_config
 
 if TYPE_CHECKING:
     from ..bot import MangaReleaseBot
@@ -64,6 +65,7 @@ class BaseModal(ABC, Modal, title="Apply Customizations"):
         """
         await interaction.response.defer()
         customizations = await self.get_customization(interaction)
+        await self.source.validate(self.entry, customizations)
         if customizations is None:
             await interaction.followup.send(
                 f"No customizations were applied to entry #{self.entry.id}."
@@ -75,18 +77,7 @@ class BaseModal(ABC, Modal, title="Apply Customizations"):
             self.entry.extra_config = self.source.default_customizations
             await self.entry.save()
         else:
-            message = f"The following customizations were successfully saved for entry #{self.entry.id}: "
-            if len(message + f"```py\n{customizations}\n```") <= 2000:
-                await interaction.followup.send(
-                    message + f"```py\n{customizations}\n```"
-                )
-            else:
-                attachment = File(
-                    str(customizations), filename=f"customizations-{self.entry.id}.py"
-                )
-                await interaction.followup.send(message.rstrip(), file=attachment)
-            self.entry.extra_config = customizations
-            await self.entry.save()
+            await save_config(self.entry, customizations, interaction)
 
 
 class BaseSource(ABC):
@@ -125,6 +116,17 @@ class BaseSource(ABC):
         :rtype: BaseModal
         """
         raise NotImplementedError
+
+    async def validate(self, entry: MangaEntry, config: Any):
+        """Validate the provided configuration. Raise an :class:`.ErrorWithContext` if the configuration is invalid.
+
+        :param entry: The entry that is getting the config
+        :type entry: MangaEntry
+        :param config: The configuration data
+        :type config: Any
+        :raises ErrorWithContext: If the configuration is invalid.
+        """
+        return
 
     @abstractmethod
     async def check_updates(

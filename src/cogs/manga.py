@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
+from json import JSONDecodeError, loads
 from typing import Optional, TYPE_CHECKING, Union
 
-from discord import InteractionType, Member, Role, TextChannel, User
+from discord import Attachment, InteractionType, Member, Role, TextChannel, User
 from discord.app_commands import AppCommandThread, Group
 from discord.ext.commands import Cog
 from tortoise.functions import Count
@@ -10,7 +11,7 @@ from .._patched.types.discord import Context, Interaction
 from ..errors.exceptions import BaseError, ErrorWithContext
 from ..models import MangaEntry, Ping
 from ..sources import BaseSource
-from ..utils.manga import get_manga_entry, resolve_id_from_thread_or_id
+from ..utils.manga import get_manga_entry, resolve_id_from_thread_or_id, save_config
 
 if TYPE_CHECKING:
     from ..bot import MangaReleaseBot
@@ -149,10 +150,29 @@ class Manga(Cog):
         interaction: Interaction,
         id: Optional[int] = None,
         thread: Optional[AppCommandThread] = None,
+        json: Optional[Attachment] = None,
     ):
         await interaction.response.defer()
         id = await resolve_id_from_thread_or_id(id, thread)
-        await self.customize_entry(interaction, id)
+        if not json:
+            await self.customize_entry(interaction, id)
+        else:
+            data = await json.read()
+            try:
+                text = data.decode("utf-8")
+            except UnicodeDecodeError:
+                raise ErrorWithContext(7, "Not a valid text file.")
+            try:
+                json_data = loads(text)
+            except JSONDecodeError:
+                raise ErrorWithContext(7, "Contents are not valid JSON.")
+            manga_entry = await get_manga_entry(
+                id, check_permissions_interaction=interaction
+            )
+            await interaction.client.source_map[manga_entry.source_id].validate(
+                manga_entry, json_data
+            )
+            await save_config(manga_entry, json_data, interaction)
 
     async def subscribe_user(
         self, interaction: Interaction, item_id: int, target: Union[User, Role]

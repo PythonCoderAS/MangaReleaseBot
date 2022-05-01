@@ -83,7 +83,9 @@ class MangadexModal(BaseModal):
             if isinstance(item, TextInput):
                 self.add_item(item)
 
-    async def get_customization(self, interaction: Interaction) -> MangaDexCustomizations:
+    async def get_customization(
+        self, interaction: Interaction
+    ) -> MangaDexCustomizations:
         return loads(self.config.value)
 
 
