@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from discord import AllowedMentions, Interaction, TextChannel
 from discord.app_commands import command
-from discord.ext.commands import Cog, Context, command as ext_command
+from discord.ext.commands import Cog
 
 from ..errors.exceptions import ErrorWithContext
 
@@ -13,13 +13,13 @@ if TYPE_CHECKING:
 class Utils(Cog):
     @command()
     async def cleanup(
-        self,
-        interaction: Interaction,
-        entire_server: bool = False,
-        channel: TextChannel = None,
-        item_id: int = None,
-        thread: int = None,
-        lock: bool = False,
+            self,
+            interaction: Interaction,
+            entire_server: bool = False,
+            channel: TextChannel = None,
+            item_id: int = None,
+            thread: int = None,
+            lock: bool = False,
     ):
         """Archives all threads made by the bot."""
         if not interaction.user.resolved_permissions.manage_threads:
@@ -43,11 +43,6 @@ class Utils(Cog):
             )
             await thread.edit(archived=True, locked=False)
         await interaction.followup.send("Done.")
-
-    @ext_command()
-    async def stop(self, ctx: Context["MangaReleaseBot"]):
-        """Stops the bot."""
-        await ctx.bot.close()
 
 
 async def setup(bot: "MangaReleaseBot"):
