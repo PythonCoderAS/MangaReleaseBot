@@ -178,7 +178,7 @@ class MangadexModal(BaseModal):
             required=True,
             default=entry.extra_config["external_links"],
         )
-        for name, item in locals().items():
+        for name, item in vars(self).items():
             if isinstance(item, TextInput):
                 self.add_item(item)
 
