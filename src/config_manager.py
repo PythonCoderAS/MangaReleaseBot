@@ -7,6 +7,7 @@ from .models import Metadata
 
 logger = logging.getLogger(__name__)
 
+
 class ConfigManager:
     last_updated: int
 

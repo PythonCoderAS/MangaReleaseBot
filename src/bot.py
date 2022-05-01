@@ -2,9 +2,18 @@ from typing import Optional
 
 from aiohttp import ClientSession
 from discord import Intents, Interaction
-from discord.app_commands import AppCommandError, CommandInvokeError as AppCommandInvokeError
-from discord.ext.commands import Bot, CommandError, CommandInvokeError as ExtCommandInvokeError, CommandNotFound, \
-    Context, when_mentioned
+from discord.app_commands import (
+    AppCommandError,
+    CommandInvokeError as AppCommandInvokeError,
+)
+from discord.ext.commands import (
+    Bot,
+    CommandError,
+    CommandInvokeError as ExtCommandInvokeError,
+    CommandNotFound,
+    Context,
+    when_mentioned,
+)
 from hondana import Client
 
 from ._patched import discord as patched_discord
@@ -33,7 +42,9 @@ class MangaReleaseBot(Bot):
                     if interaction.response.is_done():
                         await interaction.followup.send(exception.original.args[0])
                     else:
-                        await interaction.response.send_message(exception.original.args[0])
+                        await interaction.response.send_message(
+                            exception.original.args[0]
+                        )
             elif isinstance(exception, CommandNotFound):
                 return
             else:

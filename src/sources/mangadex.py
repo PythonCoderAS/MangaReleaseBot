@@ -35,7 +35,7 @@ content_ratings = [
 
 
 def get_resource_method(
-        hondana_client: Client, resource: str
+    hondana_client: Client, resource: str
 ) -> Callable[[str], Coroutine[Any, Any, Any]]:
     if resource in ("title", "manga"):
         return hondana_client.get_manga
@@ -67,71 +67,115 @@ class MangaDexCustomizations(TypedDict, total=True):
 
 
 class MangadexModal(BaseModal):
-
     def __init__(self, entry: MangaEntry, source: "MangaDex"):
         super().__init__(entry, source)
-        self.languages = TextInput(label="Languages", style=TextStyle.paragraph,
-                              placeholder="List of chapter languages that the bot will check for. Type one per line.",
-                              default="\n".join(entry.extra_config["languages"]) or None,
-                              required=False)
-        self.whitelisted_groups = TextInput(label="Whitelisted Groups", style=TextStyle.paragraph,
-                                       placeholder="List of scanlation groups that the bot will require in a chapter. "
-                                                   "Type one per line.  You can also type 'no group' to allow"
-                                                   "chapters without a group.",
-                                       default="\n".join(entry.extra_config["whitelisted_groups"]) or None,
-                                       required=False)
-        self.blacklisted_groups = TextInput(label="Blacklisted Groups", style=TextStyle.paragraph,
-                                       placeholder="List of scanlation groups that the bot will not allow in a "
-                                                   "chapter. "
-                                                   "Type one per line. You can also type 'no group' to allow"
-                                                   "chapters without a group.",
-                                       default="\n".join(entry.extra_config["blacklisted_groups"]) or None,
-                                       required=False)
-        self.whitelisted_users = TextInput(label="Whitelisted Users", style=TextStyle.paragraph,
-                                      placeholder="List of users that the bot will require to upload a chapter. Type "
-                                                  "one per line.",
-                                      default="\n".join(entry.extra_config["whitelisted_users"]) or None,
-                                      required=False)
-        self.blacklisted_users = TextInput(label="Blacklisted Users", style=TextStyle.paragraph,
-                                      placeholder="List of users that the bot will not allow to upload a chapter. "
-                                                  "Type one per line.",
-                                      default="\n".join(entry.extra_config["blacklisted_users"]) or None,
-                                      required=False)
-        self.whitelisted_content_ratings = TextInput(label="Whitelisted Content Ratings", style=TextStyle.paragraph,
-                                                placeholder="List of content ratings that the bot will require in the "
-                                                            "manga the chapter is part of. Type one per line.",
-                                                default="\n".join(
-                                                    entry.extra_config["whitelisted_content_ratings"]) or None,
-                                                required=False)
-        self.blacklisted_content_ratings = TextInput(label="Blacklisted Content Ratings", style=TextStyle.paragraph,
-                                                placeholder="List of content ratings that the bot will not allow in "
-                                                            "the manga the chapter is part of. Type one per line.",
-                                                default="\n".join(
-                                                    entry.extra_config["blacklisted_content_ratings"]) or None,
-                                                required=False)
-        self.whitelisted_tags = TextInput(label="Whitelisted Tags", style=TextStyle.paragraph,
-                                     placeholder="List of tag UUIDs that the bot will require in a chapter. Type one "
-                                                 "per line.",
-                                     default="\n".join(entry.extra_config["whitelisted_tags"]) or None,
-                                     required=False)
-        self.blacklisted_tags = TextInput(label="Blacklisted Tags", style=TextStyle.paragraph,
-                                     placeholder="List of tag UUIDs that the bot will not allow in a chapter. Type one "
-                                                 "per line.",
-                                     default="\n".join(entry.extra_config["blacklisted_tags"]) or None,
-                                     required=False)
-        self.whitelisted_mangas = TextInput(label="Whitelisted Mangas", style=TextStyle.paragraph,
-                                       placeholder="List of manga UUIDs that the bot will require in a chapter. Type "
-                                                   "one per line.",
-                                       default="\n".join(entry.extra_config["whitelisted_mangas"]) or None,
-                                       required=False)
-        self.blacklisted_mangas = TextInput(label="Blacklisted Mangas", style=TextStyle.paragraph,
-                                       placeholder="List of manga UUIDs that the bot will not allow in a chapter. "
-                                                   "Type one per line.",
-                                       default="\n".join(entry.extra_config["blacklisted_mangas"]) or None,
-                                       required=False)
-        self.external_links = TextInput(label="External Links", style=TextStyle.short,
-                                   placeholder="Whether or not the chapter can be an external link.", required=True,
-                                   default=entry.extra_config["external_links"])
+        self.languages = TextInput(
+            label="Languages",
+            style=TextStyle.paragraph,
+            placeholder="List of chapter languages that the bot will check for. Type one per "
+            "line.",
+            default="\n".join(entry.extra_config["languages"]) or None,
+            required=False,
+        )
+        self.whitelisted_groups = TextInput(
+            label="Whitelisted Groups",
+            style=TextStyle.paragraph,
+            placeholder="List of scanlation groups that the bot will require in a "
+            "chapter. "
+            "Type one per line.  You can also type 'no group' to allow"
+            "chapters without a group.",
+            default="\n".join(entry.extra_config["whitelisted_groups"]) or None,
+            required=False,
+        )
+        self.blacklisted_groups = TextInput(
+            label="Blacklisted Groups",
+            style=TextStyle.paragraph,
+            placeholder="List of scanlation groups that the bot will not allow in a "
+            "chapter. "
+            "Type one per line. You can also type 'no group' to allow"
+            "chapters without a group.",
+            default="\n".join(entry.extra_config["blacklisted_groups"]) or None,
+            required=False,
+        )
+        self.whitelisted_users = TextInput(
+            label="Whitelisted Users",
+            style=TextStyle.paragraph,
+            placeholder="List of users that the bot will require to upload a chapter. "
+            "Type "
+            "one per line.",
+            default="\n".join(entry.extra_config["whitelisted_users"]) or None,
+            required=False,
+        )
+        self.blacklisted_users = TextInput(
+            label="Blacklisted Users",
+            style=TextStyle.paragraph,
+            placeholder="List of users that the bot will not allow to upload a chapter. "
+            "Type one per line.",
+            default="\n".join(entry.extra_config["blacklisted_users"]) or None,
+            required=False,
+        )
+        self.whitelisted_content_ratings = TextInput(
+            label="Whitelisted Content Ratings",
+            style=TextStyle.paragraph,
+            placeholder="List of content ratings that the bot will require "
+            "in the "
+            "manga the chapter is part of. Type one per line.",
+            default="\n".join(entry.extra_config["whitelisted_content_ratings"])
+            or None,
+            required=False,
+        )
+        self.blacklisted_content_ratings = TextInput(
+            label="Blacklisted Content Ratings",
+            style=TextStyle.paragraph,
+            placeholder="List of content ratings that the bot will not allow "
+            "in "
+            "the manga the chapter is part of. Type one per line.",
+            default="\n".join(entry.extra_config["blacklisted_content_ratings"])
+            or None,
+            required=False,
+        )
+        self.whitelisted_tags = TextInput(
+            label="Whitelisted Tags",
+            style=TextStyle.paragraph,
+            placeholder="List of tag UUIDs that the bot will require in a chapter. Type "
+            "one "
+            "per line.",
+            default="\n".join(entry.extra_config["whitelisted_tags"]) or None,
+            required=False,
+        )
+        self.blacklisted_tags = TextInput(
+            label="Blacklisted Tags",
+            style=TextStyle.paragraph,
+            placeholder="List of tag UUIDs that the bot will not allow in a chapter. "
+            "Type one "
+            "per line.",
+            default="\n".join(entry.extra_config["blacklisted_tags"]) or None,
+            required=False,
+        )
+        self.whitelisted_mangas = TextInput(
+            label="Whitelisted Mangas",
+            style=TextStyle.paragraph,
+            placeholder="List of manga UUIDs that the bot will require in a chapter. "
+            "Type "
+            "one per line.",
+            default="\n".join(entry.extra_config["whitelisted_mangas"]) or None,
+            required=False,
+        )
+        self.blacklisted_mangas = TextInput(
+            label="Blacklisted Mangas",
+            style=TextStyle.paragraph,
+            placeholder="List of manga UUIDs that the bot will not allow in a chapter. "
+            "Type one per line.",
+            default="\n".join(entry.extra_config["blacklisted_mangas"]) or None,
+            required=False,
+        )
+        self.external_links = TextInput(
+            label="External Links",
+            style=TextStyle.short,
+            placeholder="Whether or not the chapter can be an external link.",
+            required=True,
+            default=entry.extra_config["external_links"],
+        )
         for name, item in locals().items():
             if isinstance(item, TextInput):
                 self.add_item(item)
@@ -139,21 +183,26 @@ class MangadexModal(BaseModal):
     def get_value(self, attr_name: str) -> str:
         value = getattr(self, attr_name).value
         return value.replace(" ", "").split("\n") if value.strip() != "clear" else []
-        
+
     def get_customization(self, interaction: Interaction) -> MangaDexCustomizations:
         return {
-            'languages': self.get_value("languages"),
-            'whitelisted_groups': self.get_value("whitelisted_groups"),
-            'blacklisted_groups': self.get_value("blacklisted_groups"),
-            'whitelisted_users': self.get_value("whitelisted_users"),
-            'blacklisted_users': self.get_value("blacklisted_users"),
-            'whitelisted_content_ratings': self.get_value("whitelisted_content_ratings"),
-            'blacklisted_content_ratings': self.get_value("blacklisted_content_ratings"),
-            'whitelisted_tags': self.get_value("whitelisted_tags"),
-            'blacklisted_tags': self.get_value("blacklisted_tags"),
-            'whitelisted_mangas': self.get_value("whitelisted_mangas"),
-            'blacklisted_mangas': self.get_value("blacklisted_mangas"),
-            'external_links': self.external_links.value.lower() in ["true", "yes", "1", "on"]
+            "languages": self.get_value("languages"),
+            "whitelisted_groups": self.get_value("whitelisted_groups"),
+            "blacklisted_groups": self.get_value("blacklisted_groups"),
+            "whitelisted_users": self.get_value("whitelisted_users"),
+            "blacklisted_users": self.get_value("blacklisted_users"),
+            "whitelisted_content_ratings": self.get_value(
+                "whitelisted_content_ratings"
+            ),
+            "blacklisted_content_ratings": self.get_value(
+                "blacklisted_content_ratings"
+            ),
+            "whitelisted_tags": self.get_value("whitelisted_tags"),
+            "blacklisted_tags": self.get_value("blacklisted_tags"),
+            "whitelisted_mangas": self.get_value("whitelisted_mangas"),
+            "blacklisted_mangas": self.get_value("blacklisted_mangas"),
+            "external_links": self.external_links.value.lower()
+            in ["true", "yes", "1", "on"],
         }
 
 
@@ -206,9 +255,9 @@ class MangaDex(BaseSource):
         if not customizations["external_links"] and chapter.external_url:
             return False
         if (
-                customizations["languages"]
-                and chapter.translated_language not in customizations["languages"]
-                and "*" not in customizations["languages"]
+            customizations["languages"]
+            and chapter.translated_language not in customizations["languages"]
+            and "*" not in customizations["languages"]
         ):
             return False
         if customizations["whitelisted_groups"]:
@@ -232,26 +281,26 @@ class MangaDex(BaseSource):
         resource_type, sep, resource_id = entry.item_id.partition(":")
         if resource_type != "user":
             if (
-                    customizations["whitelisted_users"]
-                    and chapter.uploader.id not in customizations["whitelisted_users"]
+                customizations["whitelisted_users"]
+                and chapter.uploader.id not in customizations["whitelisted_users"]
             ):
                 return False
             if (
-                    customizations["blacklisted_users"]
-                    and chapter.uploader.id in customizations["blacklisted_users"]
+                customizations["blacklisted_users"]
+                and chapter.uploader.id in customizations["blacklisted_users"]
             ):
                 return False
         if resource_type != "manga":
             if (
-                    customizations["whitelisted_content_ratings"]
-                    and chapter.manga.content_rating
-                    not in customizations["whitelisted_content_ratings"]
+                customizations["whitelisted_content_ratings"]
+                and chapter.manga.content_rating
+                not in customizations["whitelisted_content_ratings"]
             ):
                 return False
             if (
-                    customizations["blacklisted_content_ratings"]
-                    and chapter.manga.content_rating
-                    in customizations["blacklisted_content_ratings"]
+                customizations["blacklisted_content_ratings"]
+                and chapter.manga.content_rating
+                in customizations["blacklisted_content_ratings"]
             ):
                 return False
             if customizations["whitelisted_tags"] and chapter.manga.tags:
@@ -272,7 +321,7 @@ class MangaDex(BaseSource):
         return True
 
     async def all_chapters(
-            self, start_time: Optional[datetime], **kwargs
+        self, start_time: Optional[datetime], **kwargs
     ) -> AsyncGenerator[Chapter, None]:
         while True:
             data = await self.bot.hondana.chapter_list(
@@ -292,7 +341,7 @@ class MangaDex(BaseSource):
                 start_time = data.items[-1].created_at + timedelta(seconds=1)
 
     async def check_updates(
-            self, last_update: datetime, data: Dict[str, Sequence[MangaEntry]]
+        self, last_update: datetime, data: Dict[str, Sequence[MangaEntry]]
     ) -> List[UpdateEntry]:
         resource_types: Dict[str, Dict[str, Sequence[MangaEntry]]] = defaultdict(
             lambda: defaultdict(list)
@@ -309,7 +358,7 @@ class MangaDex(BaseSource):
             suffix_len = len(suffix)
             if len(title) + suffix_len > 100:  # Max thread title length is 100.
                 max_len = 100 - suffix_len
-                title = title[:max_len - 1] + "…"
+                title = title[: max_len - 1] + "…"
             title += suffix
             if "*" in resource_types:
                 for entry in resource_types["*"]["*"]:
@@ -323,12 +372,12 @@ class MangaDex(BaseSource):
                                 UpdateEntry(entry, title, message=chapter.url)
                             )
                 if "author" in resource_types and (
-                        *chapter.manga.authors,
-                        *chapter.manga.artists,
+                    *chapter.manga.authors,
+                    *chapter.manga.artists,
                 ):
                     for author in set(
-                            item.id
-                            for item in (*chapter.manga.authors, *chapter.manga.artists)
+                        item.id
+                        for item in (*chapter.manga.authors, *chapter.manga.artists)
                     ):
                         for entry in resource_types["author"][author]:
                             if self.filter_chapter_entry(chapter, entry):

@@ -24,12 +24,12 @@ class Manga(Cog):
 
     @manga.command()
     async def add(
-            self,
-            interaction: Interaction,
-            url: str,
-            message_channel_first: bool = False,
-            private: bool = False,
-            channel: Optional[TextChannel] = None,
+        self,
+        interaction: Interaction,
+        url: str,
+        message_channel_first: bool = False,
+        private: bool = False,
+        channel: Optional[TextChannel] = None,
     ):
         """Add a manga for checking."""
         ctx = await Context.from_interaction(interaction)
@@ -64,8 +64,8 @@ class Manga(Cog):
                         k: v
                         for k, v in manga_obj.__dict__.items()
                         if not k.startswith("_")
-                           and k
-                           not in ["guild_id", "channel_id", "item_id", "source_id", "id"]
+                        and k
+                        not in ["guild_id", "channel_id", "item_id", "source_id", "id"]
                     },
                     guild_id=manga_obj.guild_id,
                     channel_id=manga_obj.channel_id,
@@ -87,11 +87,11 @@ class Manga(Cog):
 
     @manga.command()
     async def subscribe(
-            self,
-            interaction: Interaction,
-            id: Optional[int] = None,
-            thread: Optional[AppCommandThread] = None,
-            target: Optional[Union[Member, Role]] = None,
+        self,
+        interaction: Interaction,
+        id: Optional[int] = None,
+        thread: Optional[AppCommandThread] = None,
+        target: Optional[Union[Member, Role]] = None,
     ):
         """Subscribe to a specific manga entry."""
         await interaction.response.defer()
@@ -104,11 +104,11 @@ class Manga(Cog):
 
     @manga.command()
     async def unsubscribe(
-            self,
-            interaction: Interaction,
-            id: Optional[int] = None,
-            thread: Optional[AppCommandThread] = None,
-            target: Optional[Union[Member, Role]] = None,
+        self,
+        interaction: Interaction,
+        id: Optional[int] = None,
+        thread: Optional[AppCommandThread] = None,
+        target: Optional[Union[Member, Role]] = None,
     ):
         """Unsubscribe from a specific manga entry."""
         await interaction.response.defer()
@@ -121,10 +121,10 @@ class Manga(Cog):
 
     @manga.command()
     async def pause(
-            self,
-            interaction: Interaction,
-            id: Optional[int] = None,
-            thread: Optional[AppCommandThread] = None,
+        self,
+        interaction: Interaction,
+        id: Optional[int] = None,
+        thread: Optional[AppCommandThread] = None,
     ):
         """Pause a specific manga entry."""
         await interaction.response.defer()
@@ -133,10 +133,10 @@ class Manga(Cog):
 
     @manga.command()
     async def unpause(
-            self,
-            interaction: Interaction,
-            id: Optional[int] = None,
-            thread: Optional[AppCommandThread] = None,
+        self,
+        interaction: Interaction,
+        id: Optional[int] = None,
+        thread: Optional[AppCommandThread] = None,
     ):
         """Unpause a specific manga entry."""
         await interaction.response.defer()
@@ -145,17 +145,17 @@ class Manga(Cog):
 
     @manga.command()
     async def customize(
-            self,
-            interaction: Interaction,
-            id: Optional[int] = None,
-            thread: Optional[AppCommandThread] = None,
+        self,
+        interaction: Interaction,
+        id: Optional[int] = None,
+        thread: Optional[AppCommandThread] = None,
     ):
         await interaction.response.defer()
         id = await resolve_id_from_thread_or_id(id, thread)
         await self.customize_entry(interaction, id)
 
     async def subscribe_user(
-            self, interaction: Interaction, item_id: int, target: Union[User, Role]
+        self, interaction: Interaction, item_id: int, target: Union[User, Role]
     ):
         ping_data = {
             "item_id": item_id,
@@ -192,7 +192,7 @@ class Manga(Cog):
                 )
 
     async def unsubscribe_user(
-            self, interaction: Interaction, item_id: int, target: Union[User, Role]
+        self, interaction: Interaction, item_id: int, target: Union[User, Role]
     ):
         ping_data = {
             "item_id": item_id,
@@ -217,8 +217,8 @@ class Manga(Cog):
         manga_entry = await MangaEntry.get(id=item_id)
         (other_pings,) = (
             await manga_entry.pings.all()
-                .annotate(count=Count("id"))
-                .values_list("count", flat=True)
+            .annotate(count=Count("id"))
+            .values_list("count", flat=True)
         )
         if other_pings == 0:
             manga_entry.deleted = datetime.now(tz=timezone.utc)
@@ -275,8 +275,8 @@ class Manga(Cog):
     @Cog.listener()
     async def on_interaction(self, interaction: Interaction):
         if (
-                interaction.type == InteractionType.component
-                and "custom_id" in interaction.data
+            interaction.type == InteractionType.component
+            and "custom_id" in interaction.data
         ):
             await self.process_button(interaction)
 

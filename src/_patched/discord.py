@@ -7,7 +7,7 @@ from discord.abc import Messageable
 if TYPE_CHECKING:
     from ..bot import MangaReleaseBot
 
-_T = TypeVar('_T')
+_T = TypeVar("_T")
 
 original_send = Messageable.send
 interaction_response_message = InteractionResponse.send_message
@@ -24,7 +24,9 @@ def patch(key: str):
             if bot is None:
                 pass
             else:
-                setattr(bot.config_manager, key, getattr(bot.config_manager, key, 0) + 1)
+                setattr(
+                    bot.config_manager, key, getattr(bot.config_manager, key, 0) + 1
+                )
             return function(*args, **kwargs)
 
         return wrapper
@@ -32,7 +34,7 @@ def patch(key: str):
     return patched
 
 
-Messageable.send = patch('messages')(original_send)
-InteractionResponse.send_message = patch('messages')(interaction_response_message)
-InteractionResponse.send_modal = patch('modals')(interaction_response_modal)
-Webhook.send = patch('messages')(webhook_send)
+Messageable.send = patch("messages")(original_send)
+InteractionResponse.send_message = patch("messages")(interaction_response_message)
+InteractionResponse.send_modal = patch("modals")(interaction_response_modal)
+Webhook.send = patch("messages")(webhook_send)

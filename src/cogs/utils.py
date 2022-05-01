@@ -4,7 +4,7 @@ from discord import AllowedMentions, Interaction, TextChannel
 from discord.app_commands import command
 from discord.ext.commands import Cog, Context, command as ext_command
 
-from ..errors.exceptions import Error, ErrorWithContext
+from ..errors.exceptions import ErrorWithContext
 
 if TYPE_CHECKING:
     from ..bot import MangaReleaseBot
@@ -12,8 +12,15 @@ if TYPE_CHECKING:
 
 class Utils(Cog):
     @command()
-    async def cleanup(self, interaction: Interaction, entire_server: bool = False, channel: TextChannel = None,
-                      item_id: int = None, thread: int = None, lock: bool = False):
+    async def cleanup(
+        self,
+        interaction: Interaction,
+        entire_server: bool = False,
+        channel: TextChannel = None,
+        item_id: int = None,
+        thread: int = None,
+        lock: bool = False,
+    ):
         """Archives all threads made by the bot."""
         if not interaction.user.resolved_permissions.manage_threads:
             raise ErrorWithContext(1, "Lacking permission `manage_threads`.")
@@ -30,8 +37,10 @@ class Utils(Cog):
             channel = channel or interaction.channel
             threads.extend(channel.threads)
         for thread in threads:
-            await thread.send(f"Cleaning up thread due to cleanup command (executed by {interaction.user.mention}).",
-                              allowed_mentions=AllowedMentions.none())
+            await thread.send(
+                f"Cleaning up thread due to cleanup command (executed by {interaction.user.mention}).",
+                allowed_mentions=AllowedMentions.none(),
+            )
             await thread.edit(archived=True, locked=False)
         await interaction.followup.send("Done.")
 
