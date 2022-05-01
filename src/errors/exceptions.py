@@ -15,6 +15,8 @@ class Error(BaseError):
     ):
         if kwargs is None:
             kwargs = {}
+        if mapping is None:
+            mapping = {}
         mapping.update(kwargs)
         super().__init__(
             f"[MRBErrno {code}] " + message_mapping[code].format_map(kwargs)
@@ -32,6 +34,8 @@ class ErrorWithContext(BaseError):
     ):
         if kwargs is None:
             kwargs = {}
+        if mapping is None:
+            mapping = {}
         mapping.update(kwargs)
         super().__init__(
             f"[MRBErrno {code}] "
