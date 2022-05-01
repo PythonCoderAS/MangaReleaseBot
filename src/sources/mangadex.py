@@ -1,6 +1,8 @@
 import re
+from asyncio import create_task, gather
 from collections import defaultdict
 from datetime import datetime, timedelta
+from itertools import chain
 from typing import (
     Any,
     AsyncGenerator,
@@ -340,12 +342,24 @@ class MangaDex(BaseSource):
             else:
                 start_time = data.items[-1].created_at + timedelta(seconds=1)
 
+    async def migrate(self, entry: MangaEntry):
+        config = entry.extra_config or {}
+        default = self.default_customizations
+        existing_keys = set(config.keys())
+        default_keys = set(default.keys())
+        if existing_keys != default_keys:
+            for key in default_keys - existing_keys:
+                config[key] = default[key]
+            await config.save()
+
     async def check_updates(
         self, last_update: datetime, data: Dict[str, Sequence[MangaEntry]]
     ) -> List[UpdateEntry]:
         resource_types: Dict[str, Dict[str, Sequence[MangaEntry]]] = defaultdict(
             lambda: defaultdict(list)
         )
+        flat_list = chain.from_iterable(data.values())
+        await gather(*[create_task(self.migrate(entry)) for entry in flat_list])
         entries = []
         for key, value in data.items():
             resource_type, sep, resource_id = key.partition(":")
