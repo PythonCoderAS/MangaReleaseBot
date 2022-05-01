@@ -30,8 +30,8 @@ class UpdateChecker(Cog):
         self.locks = defaultdict(Lock)
 
     async def cog_load(self):
-        self.bot.config_manager.last_updated = (
-            self.bot.config_manager.last_updated or 1650600000
+        self.bot.config_manager.last_updated = getattr(
+            self.bot.config_manager, "last_updated", 1650600000
         )
         self.update_check.start()
 

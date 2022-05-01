@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from discord import AllowedMentions, Interaction, TextChannel
 from discord.app_commands import command
-from discord.ext.commands import Cog
+from discord.ext.commands import Cog, Context, command as ext_command
 
 from ..errors.exceptions import Error, ErrorWithContext
 
@@ -34,6 +34,11 @@ class Utils(Cog):
                               allowed_mentions=AllowedMentions.none())
             await thread.edit(archived=True, locked=False)
         await interaction.followup.send("Done.")
+
+    @ext_command()
+    async def stop(self, ctx: Context["MangaReleaseBot"]):
+        """Stops the bot."""
+        await ctx.bot.close()
 
 
 async def setup(bot: "MangaReleaseBot"):

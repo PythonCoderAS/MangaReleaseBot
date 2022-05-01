@@ -27,7 +27,7 @@ class ConfigManager:
         try:
             return self.data[item].value
         except KeyError:
-            return None
+            raise AttributeError(item) from None
 
     def __setattr__(self, key: str, value: Any) -> None:
         if key in ["data", "changed", "deleted"]:
@@ -46,3 +46,5 @@ class ConfigManager:
         logger.debug("Saving %s, Deleting %s", self.changed, self.deleted)
         await gather(*[self.data[item].save() for item in self.changed])
         await gather(*[item.delete() for item in self.deleted])
+        self.changed.clear()
+        self.deleted.clear()

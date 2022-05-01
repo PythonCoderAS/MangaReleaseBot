@@ -6,11 +6,11 @@ from discord.app_commands import AppCommandThread, Group
 from discord.ext.commands import Cog
 from tortoise.functions import Count
 
-from ...errors.exceptions import Error, ErrorWithContext
-from ...models import MangaEntry, Ping, ThreadData
+from ..._patched.types.discord import Context, Interaction
+from ...errors.exceptions import ErrorWithContext
+from ...models import MangaEntry, Ping
 from ...sources import BaseSource
 from ...utils.manga import get_manga_entry, resolve_id_from_thread_or_id
-from ..._patched.types.discord import Context, Interaction
 
 if TYPE_CHECKING:
     from ...bot import MangaReleaseBot
@@ -108,7 +108,7 @@ class Manga(Cog):
             interaction: Interaction,
             id: Optional[int] = None,
             thread: Optional[AppCommandThread] = None,
-            target: Optional[Union[User, Role]] = None,
+            target: Optional[Union[Member, Role]] = None,
     ):
         """Unsubscribe from a specific manga entry."""
         await interaction.response.defer()
