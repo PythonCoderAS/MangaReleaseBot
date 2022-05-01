@@ -127,24 +127,6 @@ class BaseSource(ABC):
         """
         raise NotImplementedError
 
-    async def remove_item(self, ctx: Context, entry: MangaEntry):
-        """Remove an item from being notified."""
-        items = (
-            await entry.pings.all()
-            .annotate(count=Count("id"))
-            .group_by("is_role")
-            .values("is_role", "count")
-        )
-        role = user = 0
-        for item in items:
-            if item["is_role"]:
-                role = item["count"]
-            else:
-                user = item["count"]
-        message = f"Removed release notification ID {entry.id} (with {role} roles and {user} users)."
-        await entry.delete()
-        await ctx.send(message)
-
     @abstractmethod
     async def check_updates(
         self, last_update: datetime, data: Dict[str, Sequence[MangaEntry]]

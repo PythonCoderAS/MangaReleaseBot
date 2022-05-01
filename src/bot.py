@@ -69,7 +69,5 @@ class MangaReleaseBot(Bot):
             await context.send(f"Error: {exception}")
 
 
-
-
 def main():
     MangaReleaseBot().run(bot_token)

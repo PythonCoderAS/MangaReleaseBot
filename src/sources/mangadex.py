@@ -18,7 +18,7 @@ from hondana import Chapter, Client, ContentRating, NotFound
 from hondana.enums import Order
 from hondana.query import ChapterIncludes, FeedOrderQuery
 
-from .base import BaseSource, UpdateEntry
+from .base import BaseModal, BaseSource, UpdateEntry
 from ..models import MangaEntry
 
 includes = ChapterIncludes()
@@ -32,7 +32,7 @@ content_ratings = [
 
 
 def get_resource_method(
-    hondana_client: Client, resource: str
+        hondana_client: Client, resource: str
 ) -> Callable[[str], Coroutine[Any, Any, Any]]:
     if resource in ("title", "manga"):
         return hondana_client.get_manga
@@ -65,7 +65,8 @@ class MangaDex(BaseSource):
 
     source_name = "MangaDex"
     url_regex = re.compile(
-        r"^https?://mangadex\.org/(title|user|group|manga|author)/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}|\*)"
+        r"^https?://mangadex\.org/(title|user|group|manga|author)/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{"
+        r"4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}|\*)"
     )
 
     default_customizations: ClassVar[MangaDexCustomizations] = {
@@ -80,6 +81,9 @@ class MangaDex(BaseSource):
         "blacklisted_tags": [],
         "external_links": False,
     }
+
+    async def customize(self, entry: MangaEntry) -> BaseModal:
+        pass
 
     async def get_id(self, url: str) -> Optional[str]:
         match = self.url_regex.match(url)
@@ -104,9 +108,9 @@ class MangaDex(BaseSource):
         if not customizations["external_links"] and chapter.external_url:
             return False
         if (
-            customizations["languages"]
-            and chapter.translated_language not in customizations["languages"]
-            and "*" not in customizations["languages"]
+                customizations["languages"]
+                and chapter.translated_language not in customizations["languages"]
+                and "*" not in customizations["languages"]
         ):
             return False
         if customizations["whitelisted_groups"]:
@@ -130,26 +134,26 @@ class MangaDex(BaseSource):
         resource_type, sep, resource_id = entry.item_id.partition(":")
         if resource_type != "user":
             if (
-                customizations["whitelisted_users"]
-                and chapter.uploader.id not in customizations["whitelisted_users"]
+                    customizations["whitelisted_users"]
+                    and chapter.uploader.id not in customizations["whitelisted_users"]
             ):
                 return False
             if (
-                customizations["blacklisted_users"]
-                and chapter.uploader.id in customizations["blacklisted_users"]
+                    customizations["blacklisted_users"]
+                    and chapter.uploader.id in customizations["blacklisted_users"]
             ):
                 return False
         if resource_type != "manga":
             if (
-                customizations["whitelisted_content_ratings"]
-                and chapter.manga.content_rating
-                not in customizations["whitelisted_content_ratings"]
+                    customizations["whitelisted_content_ratings"]
+                    and chapter.manga.content_rating
+                    not in customizations["whitelisted_content_ratings"]
             ):
                 return False
             if (
-                customizations["blacklisted_content_ratings"]
-                and chapter.manga.content_rating
-                in customizations["blacklisted_content_ratings"]
+                    customizations["blacklisted_content_ratings"]
+                    and chapter.manga.content_rating
+                    in customizations["blacklisted_content_ratings"]
             ):
                 return False
             if customizations["whitelisted_tags"] and chapter.manga.tags:
@@ -164,7 +168,7 @@ class MangaDex(BaseSource):
         return True
 
     async def all_chapters(
-        self, start_time: Optional[datetime], **kwargs
+            self, start_time: Optional[datetime], **kwargs
     ) -> AsyncGenerator[Chapter, None]:
         while True:
             data = await self.bot.hondana.chapter_list(
@@ -184,7 +188,7 @@ class MangaDex(BaseSource):
                 start_time = data.items[-1].created_at + timedelta(seconds=1)
 
     async def check_updates(
-        self, last_update: datetime, data: Dict[str, Sequence[MangaEntry]]
+            self, last_update: datetime, data: Dict[str, Sequence[MangaEntry]]
     ) -> List[UpdateEntry]:
         resource_types: Dict[str, Dict[str, Sequence[MangaEntry]]] = defaultdict(
             lambda: defaultdict(list)
@@ -199,7 +203,7 @@ class MangaDex(BaseSource):
             title = chapter.manga.title
             suffix = f" Chapter {chapter.chapter or chapter.title or 'Oneshot'}"
             suffix_len = len(suffix)
-            if len(title) + suffix_len > 100: # Max thread title length is 100.
+            if len(title) + suffix_len > 100:  # Max thread title length is 100.
                 max_len = 100 - suffix_len
                 title = title[:max_len - 1] + "…"
             title += suffix
@@ -215,12 +219,12 @@ class MangaDex(BaseSource):
                                 UpdateEntry(entry, title, message=chapter.url)
                             )
                 if "author" in resource_types and (
-                    *chapter.manga.authors,
-                    *chapter.manga.artists,
+                        *chapter.manga.authors,
+                        *chapter.manga.artists,
                 ):
                     for author in set(
-                        item.id
-                        for item in (*chapter.manga.authors, *chapter.manga.artists)
+                            item.id
+                            for item in (*chapter.manga.authors, *chapter.manga.artists)
                     ):
                         for entry in resource_types["author"][author]:
                             if self.filter_chapter_entry(chapter, entry):
