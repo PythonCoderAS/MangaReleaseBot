@@ -6,14 +6,14 @@ from discord.app_commands import AppCommandThread, Group
 from discord.ext.commands import Cog
 from tortoise.functions import Count
 
-from ..._patched.types.discord import Context, Interaction
-from ...errors.exceptions import ErrorWithContext
-from ...models import MangaEntry, Ping
-from ...sources import BaseSource
-from ...utils.manga import get_manga_entry, resolve_id_from_thread_or_id
+from .._patched.types.discord import Context, Interaction
+from ..errors.exceptions import ErrorWithContext
+from ..models import MangaEntry, Ping
+from ..sources import BaseSource
+from ..utils.manga import get_manga_entry, resolve_id_from_thread_or_id
 
 if TYPE_CHECKING:
-    from ...bot import MangaReleaseBot
+    from ..bot import MangaReleaseBot
 
 
 class Manga(Cog):
