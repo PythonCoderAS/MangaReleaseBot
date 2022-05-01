@@ -77,7 +77,7 @@ class MangadexModal(BaseModal):
             style=TextStyle.paragraph,
             placeholder="Config JSON object",
             default=dumps(entry.extra_config),
-            required=False
+            required=False,
         )
         for name, item in vars(self).items():
             if isinstance(item, TextInput):

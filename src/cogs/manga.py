@@ -7,7 +7,7 @@ from discord.ext.commands import Cog
 from tortoise.functions import Count
 
 from .._patched.types.discord import Context, Interaction
-from ..errors.exceptions import ErrorWithContext
+from ..errors.exceptions import BaseError, ErrorWithContext
 from ..models import MangaEntry, Ping
 from ..sources import BaseSource
 from ..utils.manga import get_manga_entry, resolve_id_from_thread_or_id
@@ -255,22 +255,36 @@ class Manga(Cog):
         custom_id = interaction.data["custom_id"]
         if custom_id is None:
             return
-        if custom_id.startswith("subscribe_id_"):
-            await interaction.response.defer()
-            await self.subscribe_user(
-                interaction, int(custom_id[13:]), interaction.user
-            )
-        elif custom_id.startswith("unsubscribe_id_"):
-            await interaction.response.defer()
-            await self.unsubscribe_user(interaction, custom_id[15:], interaction.user)
-        elif custom_id.startswith("pause_id_"):
-            await interaction.response.defer()
-            await self.pause_entry(interaction, custom_id[9:])
-        elif custom_id.startswith("unpause_id_"):
-            await interaction.response.defer()
-            await self.unpause_entry(interaction, custom_id[11:])
-        elif custom_id.startswith("customize_id_"):
-            await self.customize_entry(interaction, custom_id[13:])
+        try:
+            if custom_id.startswith("subscribe_id_"):
+                await interaction.response.defer()
+                await self.subscribe_user(
+                    interaction, int(custom_id[13:]), interaction.user
+                )
+            elif custom_id.startswith("unsubscribe_id_"):
+                await interaction.response.defer()
+                await self.unsubscribe_user(
+                    interaction, custom_id[15:], interaction.user
+                )
+            elif custom_id.startswith("pause_id_"):
+                await interaction.response.defer()
+                await self.pause_entry(interaction, custom_id[9:])
+            elif custom_id.startswith("unpause_id_"):
+                await interaction.response.defer()
+                await self.unpause_entry(interaction, custom_id[11:])
+            elif custom_id.startswith("customize_id_"):
+                await self.customize_entry(interaction, custom_id[13:])
+        except BaseError as exception:
+            if interaction.response.is_done():
+                await interaction.followup.send(exception.args[0])
+            else:
+                await interaction.response.send_message(exception.args[0])
+        except Exception as exception:
+            msg = f"Error: {exception}"
+            if interaction.response.is_done():
+                await interaction.followup.send(msg)
+            else:
+                await interaction.response.send_message(msg)
 
     @Cog.listener()
     async def on_interaction(self, interaction: Interaction):

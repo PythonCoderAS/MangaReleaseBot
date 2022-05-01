@@ -13,13 +13,13 @@ if TYPE_CHECKING:
 class Utils(Cog):
     @command()
     async def cleanup(
-            self,
-            interaction: Interaction,
-            entire_server: bool = False,
-            channel: TextChannel = None,
-            item_id: int = None,
-            thread: int = None,
-            lock: bool = False,
+        self,
+        interaction: Interaction,
+        entire_server: bool = False,
+        channel: TextChannel = None,
+        item_id: int = None,
+        thread: int = None,
+        lock: bool = False,
     ):
         """Archives all threads made by the bot."""
         if not interaction.user.resolved_permissions.manage_threads:

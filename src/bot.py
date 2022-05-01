@@ -37,6 +37,7 @@ class MangaReleaseBot(Bot):
 
         @self.tree.error
         async def on_error(interaction: Interaction, exception: AppCommandError):
+            print("Error: ", exception)
             if isinstance(exception, AppCommandInvokeError):
                 if isinstance(exception.original, BaseError):
                     if interaction.response.is_done():
@@ -45,8 +46,6 @@ class MangaReleaseBot(Bot):
                         await interaction.response.send_message(
                             exception.original.args[0]
                         )
-            elif isinstance(exception, CommandNotFound):
-                return
             else:
                 if interaction.response.is_done():
                     await interaction.followup.send(f"Error: {exception}")
