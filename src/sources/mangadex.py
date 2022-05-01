@@ -350,7 +350,8 @@ class MangaDex(BaseSource):
         if existing_keys != default_keys:
             for key in default_keys - existing_keys:
                 config[key] = default[key]
-            await config.save()
+            entry.extra_config = config
+            await entry.save()
 
     async def check_updates(
         self, last_update: datetime, data: Dict[str, Sequence[MangaEntry]]
