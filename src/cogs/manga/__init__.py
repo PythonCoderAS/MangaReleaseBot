@@ -1,18 +1,19 @@
 from datetime import datetime, timezone
 from typing import Optional, TYPE_CHECKING, Union
 
-from discord import InteractionType, Role, TextChannel, User
+from discord import InteractionType, Member, Role, TextChannel, User
 from discord.app_commands import AppCommandThread, Group
 from discord.ext.commands import Cog
 from tortoise.functions import Count
 
-from ..models import MangaEntry, Ping, ThreadData
-from ..sources import BaseSource
-from ..utils.manga import get_manga_entry
-from .._patched.types.discord import Context, Interaction
+from ...errors.exceptions import Error, ErrorWithContext
+from ...models import MangaEntry, Ping, ThreadData
+from ...sources import BaseSource
+from ...utils.manga import get_manga_entry, resolve_id_from_thread_or_id
+from ..._patched.types.discord import Context, Interaction
 
 if TYPE_CHECKING:
-    from ..bot import MangaReleaseBot
+    from ...bot import MangaReleaseBot
 
 
 class Manga(Cog):
@@ -36,22 +37,14 @@ class Manga(Cog):
             channel = ctx.channel
         if private:
             if not channel.permissions_for(ctx.me).create_private_threads:
-                return await ctx.send(
-                    "I don't have permission to create private threads."
-                )
+                raise ErrorWithContext(3, "Missing permission `create_private_threads`")
             elif not channel.permissions_for(ctx.author).create_private_threads:
-                return await ctx.send(
-                    "You don't have permission to create private threads."
-                )
+                raise ErrorWithContext(1, "Missing permission `create_private_threads`")
         else:
             if not channel.permissions_for(ctx.me).create_public_threads:
-                return await ctx.send(
-                    "I don't have permission to create public threads."
-                )
+                raise ErrorWithContext(3, "Missing permission `create_public_threads`")
             elif not channel.permissions_for(ctx.author).create_public_threads:
-                return await ctx.send(
-                    "You don't have permission to create public threads."
-                )
+                raise ErrorWithContext(1, "Missing permission `create_public_threads`")
         if private and message_channel_first:
             return await ctx.send("A message cannot be sent first for private threads.")
         for name, source in self.source_map.items():
@@ -98,56 +91,15 @@ class Manga(Cog):
             interaction: Interaction,
             id: Optional[int] = None,
             thread: Optional[AppCommandThread] = None,
-            target: Optional[Union[User, Role]] = None,
+            target: Optional[Union[Member, Role]] = None,
     ):
         """Subscribe to a specific manga entry."""
-        ctx = await Context.from_interaction(interaction)
-        await ctx.defer()
-        manga_entry = None
-        if thread and id:
-            obj = await ThreadData.get_or_none(thread_id=thread.id)
-            if obj is None:
-                return await ctx.send(
-                    "This thread was not created by the bot. Please use this command in a thread created by the bot."
-                )
-            manga_entry = await MangaEntry.get_or_none(id=id)
-            if manga_entry is None:
-                return await ctx.send("This entry does not exist.")
-            if (await obj.entry).id != id:
-                return await ctx.send(
-                    "Linked manga entry ID mistmatch. Please specify either `thread` or `id` but not both."
-                )
-        elif thread:
-            obj = await ThreadData.get_or_none(thread_id=thread.id)
-            if obj is None:
-                return await ctx.send(
-                    "This thread was not created by the bot. Please use this command in a thread created by the bot."
-                )
-            id = (await obj.entry).id
-        if id is None:
-            thread_id = ctx.channel.id
-            obj = await ThreadData.get_or_none(thread_id=thread_id)
-            if obj is None:
-                return await ctx.send(
-                    "This thread was not created by the bot. Please use this command in a thread created by the bot."
-                )
-            else:
-                manga_entry = await obj.entry
-                id = manga_entry.id
-        if manga_entry is None:
-            manga_entry = await MangaEntry.get_or_none(id=id)
-            if manga_entry is None:
-                return await ctx.send("Invalid item ID.")
+        await interaction.response.defer()
+        manga_id = await resolve_id_from_thread_or_id(id, thread)
         if target is None:
-            target = ctx.author
-        if target != ctx.author:
-            if (
-                    not ctx.channel.permissions_for(ctx.author).manage_threads
-                    and ctx.author.id != manga_entry.creator_id
-            ):
-                return await ctx.send(
-                    "You don't have permission to add other people or roles as targets."
-                )
+            target = interaction.user
+        if target.id != interaction.user.id:
+            await get_manga_entry(manga_id, check_permissions_interaction=interaction)
         await self.subscribe_user(interaction, id, target)
 
     @manga.command()
@@ -159,53 +111,12 @@ class Manga(Cog):
             target: Optional[Union[User, Role]] = None,
     ):
         """Unsubscribe from a specific manga entry."""
-        ctx = await Context.from_interaction(interaction)
-        await ctx.defer()
-        manga_entry = None
-        if thread and id:
-            obj = await ThreadData.get_or_none(thread_id=thread.id)
-            if obj is None:
-                return await ctx.send(
-                    "This thread was not created by the bot. Please use this command in a thread created by the bot."
-                )
-            manga_entry = await MangaEntry.get_or_none(id=id)
-            if manga_entry is None:
-                return await ctx.send("This entry does not exist.")
-            if (await obj.entry).id != id:
-                return await ctx.send(
-                    "Linked manga entry ID mistmatch. Please specify either `thread` or `id` but not both."
-                )
-        elif thread:
-            obj = await ThreadData.get_or_none(thread_id=thread.id)
-            if obj is None:
-                return await ctx.send(
-                    "This thread was not created by the bot. Please use this command in a thread created by the bot."
-                )
-            id = (await obj.entry).id
-        if id is None:
-            thread_id = ctx.channel.id
-            obj = await ThreadData.get_or_none(thread_id=thread_id)
-            if obj is None:
-                return await ctx.send(
-                    "This thread was not created by the bot. Please use this command in a thread created by the bot."
-                )
-            else:
-                manga_entry = await obj.entry
-                id = manga_entry.id
-        if manga_entry is None:
-            manga_entry = await MangaEntry.get_or_none(id=id)
-            if manga_entry is None:
-                return await ctx.send("Invalid item ID.")
+        await interaction.response.defer()
+        manga_id = await resolve_id_from_thread_or_id(id, thread)
         if target is None:
-            target = ctx.author
-        if target != ctx.author:
-            if (
-                    not ctx.channel.permissions_for(ctx.author).manage_threads
-                    and ctx.author.id != manga_entry.creator_id
-            ):
-                return await ctx.send(
-                    "You don't have permission to remove other people or roles as targets."
-                )
+            target = interaction.user
+        if target.id != interaction.user.id:
+            await get_manga_entry(manga_id, check_permissions_interaction=interaction)
         await self.unsubscribe_user(interaction, id, target)
 
     @manga.command()
@@ -216,38 +127,8 @@ class Manga(Cog):
             thread: Optional[AppCommandThread] = None,
     ):
         """Pause a specific manga entry."""
-        ctx = await Context.from_interaction(interaction)
-        await ctx.defer()
-        if thread and id:
-            obj = await ThreadData.get_or_none(thread_id=thread.id)
-            if obj is None:
-                return await ctx.send(
-                    "This thread was not created by the bot. Please use this command in a thread created by the bot."
-                )
-            manga_entry = await MangaEntry.get_or_none(id=id)
-            if manga_entry is None:
-                return await ctx.send("This entry does not exist.")
-            if (await obj.entry).id != id:
-                return await ctx.send(
-                    "Linked manga entry ID mistmatch. Please specify either `thread` or `id` but not both."
-                )
-        elif thread:
-            obj = await ThreadData.get_or_none(thread_id=thread.id)
-            if obj is None:
-                return await ctx.send(
-                    "This thread was not created by the bot. Please use this command in a thread created by the bot."
-                )
-            id = (await obj.entry).id
-        if id is None:
-            thread_id = ctx.channel.id
-            obj = await ThreadData.get_or_none(thread_id=thread_id)
-            if obj is None:
-                return await ctx.send(
-                    "This thread was not created by the bot. Please use this command in a thread created by the bot."
-                )
-            else:
-                manga_entry = await obj.entry
-                id = manga_entry.id
+        await interaction.response.defer()
+        id = await resolve_id_from_thread_or_id(id, thread)
         await self.pause_entry(interaction, id)
 
     @manga.command()
@@ -258,38 +139,8 @@ class Manga(Cog):
             thread: Optional[AppCommandThread] = None,
     ):
         """Unpause a specific manga entry."""
-        ctx = await Context.from_interaction(interaction)
-        await ctx.defer()
-        if thread and id:
-            obj = await ThreadData.get_or_none(thread_id=thread.id)
-            if obj is None:
-                return await ctx.send(
-                    "This thread was not created by the bot. Please use this command in a thread created by the bot."
-                )
-            manga_entry = await MangaEntry.get_or_none(id=id)
-            if manga_entry is None:
-                return await ctx.send("This entry does not exist.")
-            if (await obj.entry).id != id:
-                return await ctx.send(
-                    "Linked manga entry ID mistmatch. Please specify either `thread` or `id` but not both."
-                )
-        elif thread:
-            obj = await ThreadData.get_or_none(thread_id=thread.id)
-            if obj is None:
-                return await ctx.send(
-                    "This thread was not created by the bot. Please use this command in a thread created by the bot."
-                )
-            id = (await obj.entry).id
-        if id is None:
-            thread_id = ctx.channel.id
-            obj = await ThreadData.get_or_none(thread_id=thread_id)
-            if obj is None:
-                return await ctx.send(
-                    "This thread was not created by the bot. Please use this command in a thread created by the bot."
-                )
-            else:
-                manga_entry = await obj.entry
-                id = manga_entry.id
+        await interaction.response.defer()
+        id = await resolve_id_from_thread_or_id(id, thread)
         await self.unpause_entry(interaction, id)
 
     @manga.command()
@@ -299,38 +150,8 @@ class Manga(Cog):
             id: Optional[int] = None,
             thread: Optional[AppCommandThread] = None,
     ):
-        ctx = await Context.from_interaction(interaction)
-        await ctx.defer()
-        if thread and id:
-            obj = await ThreadData.get_or_none(thread_id=thread.id)
-            if obj is None:
-                return await ctx.send(
-                    "This thread was not created by the bot. Please use this command in a thread created by the bot."
-                )
-            manga_entry = await MangaEntry.get_or_none(id=id)
-            if manga_entry is None:
-                return await ctx.send("This entry does not exist.")
-            if (await obj.entry).id != id:
-                return await ctx.send(
-                    "Linked manga entry ID mistmatch. Please specify either `thread` or `id` but not both."
-                )
-        elif thread:
-            obj = await ThreadData.get_or_none(thread_id=thread.id)
-            if obj is None:
-                return await ctx.send(
-                    "This thread was not created by the bot. Please use this command in a thread created by the bot."
-                )
-            id = (await obj.entry).id
-        if id is None:
-            thread_id = ctx.channel.id
-            obj = await ThreadData.get_or_none(thread_id=thread_id)
-            if obj is None:
-                return await ctx.send(
-                    "This thread was not created by the bot. Please use this command in a thread created by the bot."
-                )
-            else:
-                manga_entry = await obj.entry
-                id = manga_entry.id
+        await interaction.response.defer()
+        id = await resolve_id_from_thread_or_id(id, thread)
         await self.customize_entry(interaction, id)
 
     async def subscribe_user(

@@ -43,6 +43,8 @@ class Ping(Model):
     mention_id = BigIntField(null=False, index=True)
     is_role = BooleanField(null=False, default=False)
 
+    item_id: int
+
 
 class Metadata(Model):
     key = CharField(256, pk=True, index=True)
@@ -54,6 +56,8 @@ class ThreadData(Model):
     entry: ForeignKeyRelation[MangaEntry] = ForeignKeyField(
         "models.MangaEntry", related_name="threads", on_delete="CASCADE", index=True
     )
+
+    entry_id: int
 
     @property
     def created_at(self) -> datetime:
