@@ -3,12 +3,12 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, ClassVar, Dict, List, Optional, Pattern, Sequence, TYPE_CHECKING
 
-from discord import Embed, File, Interaction
-from discord.ext.commands import Context
+from discord import Embed, File
 from discord.ui import Modal
 from tortoise.functions import Count
 
 from ..models import MangaEntry
+from .._patched.types.discord import Context, Interaction
 
 if TYPE_CHECKING:
     from ..bot import MangaReleaseBot

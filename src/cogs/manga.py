@@ -1,13 +1,15 @@
 from datetime import datetime, timezone
 from typing import Optional, TYPE_CHECKING, Union
 
-from discord import Interaction, InteractionType, Role, TextChannel, User, Thread
+from discord import InteractionType, Role, TextChannel, User
 from discord.app_commands import AppCommandThread, Group
-from discord.ext.commands import Cog, Context
+from discord.ext.commands import Cog
 from tortoise.functions import Count
 
 from ..models import MangaEntry, Ping, ThreadData
 from ..sources import BaseSource
+from ..utils.manga import get_manga_entry
+from .._patched.types.discord import Context, Interaction
 
 if TYPE_CHECKING:
     from ..bot import MangaReleaseBot
@@ -21,12 +23,12 @@ class Manga(Cog):
 
     @manga.command()
     async def add(
-        self,
-        interaction: Interaction,
-        url: str,
-        message_channel_first: bool = False,
-        private: bool = False,
-        channel: Optional[TextChannel] = None,
+            self,
+            interaction: Interaction,
+            url: str,
+            message_channel_first: bool = False,
+            private: bool = False,
+            channel: Optional[TextChannel] = None,
     ):
         """Add a manga for checking."""
         ctx = await Context.from_interaction(interaction)
@@ -69,8 +71,8 @@ class Manga(Cog):
                         k: v
                         for k, v in manga_obj.__dict__.items()
                         if not k.startswith("_")
-                        and k
-                        not in ["guild_id", "channel_id", "item_id", "source_id", "id"]
+                           and k
+                           not in ["guild_id", "channel_id", "item_id", "source_id", "id"]
                     },
                     guild_id=manga_obj.guild_id,
                     channel_id=manga_obj.channel_id,
@@ -92,11 +94,11 @@ class Manga(Cog):
 
     @manga.command()
     async def subscribe(
-        self,
-        interaction: Interaction,
-        id: Optional[int] = None,
-        thread: Optional[AppCommandThread] = None,
-        target: Optional[Union[User, Role]] = None,
+            self,
+            interaction: Interaction,
+            id: Optional[int] = None,
+            thread: Optional[AppCommandThread] = None,
+            target: Optional[Union[User, Role]] = None,
     ):
         """Subscribe to a specific manga entry."""
         ctx = await Context.from_interaction(interaction)
@@ -140,8 +142,8 @@ class Manga(Cog):
             target = ctx.author
         if target != ctx.author:
             if (
-                not ctx.channel.permissions_for(ctx.author).manage_threads
-                and ctx.author.id != manga_entry.creator_id
+                    not ctx.channel.permissions_for(ctx.author).manage_threads
+                    and ctx.author.id != manga_entry.creator_id
             ):
                 return await ctx.send(
                     "You don't have permission to add other people or roles as targets."
@@ -150,11 +152,11 @@ class Manga(Cog):
 
     @manga.command()
     async def unsubscribe(
-        self,
-        interaction: Interaction,
-        id: Optional[int] = None,
-        thread: Optional[AppCommandThread] = None,
-        target: Optional[Union[User, Role]] = None,
+            self,
+            interaction: Interaction,
+            id: Optional[int] = None,
+            thread: Optional[AppCommandThread] = None,
+            target: Optional[Union[User, Role]] = None,
     ):
         """Unsubscribe from a specific manga entry."""
         ctx = await Context.from_interaction(interaction)
@@ -198,8 +200,8 @@ class Manga(Cog):
             target = ctx.author
         if target != ctx.author:
             if (
-                not ctx.channel.permissions_for(ctx.author).manage_threads
-                and ctx.author.id != manga_entry.creator_id
+                    not ctx.channel.permissions_for(ctx.author).manage_threads
+                    and ctx.author.id != manga_entry.creator_id
             ):
                 return await ctx.send(
                     "You don't have permission to remove other people or roles as targets."
@@ -208,10 +210,10 @@ class Manga(Cog):
 
     @manga.command()
     async def pause(
-        self,
-        interaction: Interaction,
-        id: Optional[int] = None,
-        thread: Optional[AppCommandThread] = None,
+            self,
+            interaction: Interaction,
+            id: Optional[int] = None,
+            thread: Optional[AppCommandThread] = None,
     ):
         """Pause a specific manga entry."""
         ctx = await Context.from_interaction(interaction)
@@ -250,10 +252,10 @@ class Manga(Cog):
 
     @manga.command()
     async def unpause(
-        self,
-        interaction: Interaction,
-        id: Optional[int] = None,
-        thread: Optional[AppCommandThread] = None,
+            self,
+            interaction: Interaction,
+            id: Optional[int] = None,
+            thread: Optional[AppCommandThread] = None,
     ):
         """Unpause a specific manga entry."""
         ctx = await Context.from_interaction(interaction)
@@ -292,10 +294,10 @@ class Manga(Cog):
 
     @manga.command()
     async def customize(
-        self,
-        interaction: Interaction,
-        id: Optional[int] = None,
-        thread: Optional[AppCommandThread] = None,
+            self,
+            interaction: Interaction,
+            id: Optional[int] = None,
+            thread: Optional[AppCommandThread] = None,
     ):
         ctx = await Context.from_interaction(interaction)
         await ctx.defer()
@@ -332,7 +334,7 @@ class Manga(Cog):
         await self.customize_entry(interaction, id)
 
     async def subscribe_user(
-        self, interaction: Interaction, item_id: int, target: Union[User, Role]
+            self, interaction: Interaction, item_id: int, target: Union[User, Role]
     ):
         ping_data = {
             "item_id": item_id,
@@ -369,7 +371,7 @@ class Manga(Cog):
                 )
 
     async def unsubscribe_user(
-        self, interaction: Interaction, item_id: int, target: Union[User, Role]
+            self, interaction: Interaction, item_id: int, target: Union[User, Role]
     ):
         ping_data = {
             "item_id": item_id,
@@ -394,8 +396,8 @@ class Manga(Cog):
         manga_entry = await MangaEntry.get(id=item_id)
         (other_pings,) = (
             await manga_entry.pings.all()
-            .annotate(count=Count("id"))
-            .values_list("count", flat=True)
+                .annotate(count=Count("id"))
+                .values_list("count", flat=True)
         )
         if other_pings == 0:
             manga_entry.deleted = datetime.now(tz=timezone.utc)
@@ -406,17 +408,7 @@ class Manga(Cog):
             )
 
     async def pause_entry(self, interaction: Interaction, item_id: int):
-        manga_entry = await MangaEntry.get(id=item_id)
-        if manga_entry is None:
-            return await interaction.followup.send("This entry does not exist.")
-        member = interaction.guild.get_member(interaction.user.id)
-        if (
-            not interaction.channel.permissions_for(member).manage_threads
-            and interaction.user.id != manga_entry.creator_id
-        ):
-            return await interaction.followup.send(
-                "You don't have permission to pause manga entries."
-            )
+        manga_entry = await get_manga_entry(item_id, interaction)
         if manga_entry.paused:
             return await interaction.followup.send("This entry is already paused.")
         manga_entry.paused = datetime.now(tz=timezone.utc)
@@ -424,17 +416,7 @@ class Manga(Cog):
         await interaction.followup.send(f"Paused entry {item_id}.")
 
     async def unpause_entry(self, interaction: Interaction, item_id: int):
-        manga_entry = await MangaEntry.get(id=item_id)
-        if manga_entry is None:
-            return await interaction.followup.send("This entry does not exist.")
-        member = interaction.guild.get_member(interaction.user.id)
-        if (
-            not interaction.channel.permissions_for(member).manage_threads
-            and interaction.user.id != manga_entry.creator_id
-        ):
-            return await interaction.followup.send(
-                "You don't have permission to unpause manga entries."
-            )
+        manga_entry = await get_manga_entry(item_id, interaction)
         if not manga_entry.paused:
             return await interaction.followup.send("This entry is not paused.")
         manga_entry.paused = None
@@ -442,17 +424,7 @@ class Manga(Cog):
         await interaction.followup.send(f"Unpaused entry {item_id}.")
 
     async def customize_entry(self, interaction: Interaction, item_id: int):
-        manga_entry = await MangaEntry.get(id=item_id)
-        if manga_entry is None:
-            return await interaction.followup.send("This entry does not exist.")
-        member = interaction.guild.get_member(interaction.user.id)
-        if (
-            not interaction.channel.permissions_for(member).manage_threads
-            and interaction.user.id != manga_entry.creator_id
-        ):
-            return await interaction.followup.send(
-                "You don't have permission to customize manga entries."
-            )
+        manga_entry = await get_manga_entry(item_id, interaction)
         modal = await interaction.client.source_map[manga_entry.source_id].customize(
             manga_entry
         )
@@ -482,8 +454,8 @@ class Manga(Cog):
     @Cog.listener()
     async def on_interaction(self, interaction: Interaction):
         if (
-            interaction.type == InteractionType.component
-            and "custom_id" in interaction.data
+                interaction.type == InteractionType.component
+                and "custom_id" in interaction.data
         ):
             await self.process_button(interaction)
 

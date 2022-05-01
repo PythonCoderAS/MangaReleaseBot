@@ -150,7 +150,7 @@ class UpdateChecker(Cog):
                 )
             else:
                 logger.debug("No source object found for %s", source_id)
-        entries: List[List[UpdateEntry]] = await gather(*tasks)
+        entries: List[List[UpdateEntry]] = await gather(*tasks) # type: ignore
         logger.debug("Got entries: %s", entries)
         entry_tasks: dict[str, list[UpdateEntry]] = defaultdict(list)
         for top_layer in entries:

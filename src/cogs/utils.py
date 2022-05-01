@@ -4,6 +4,8 @@ from discord import AllowedMentions, Interaction, TextChannel
 from discord.app_commands import command
 from discord.ext.commands import Cog
 
+from ..errors.exceptions import Error, ErrorWithContext
+
 if TYPE_CHECKING:
     from ..bot import MangaReleaseBot
 
@@ -14,7 +16,7 @@ class Utils(Cog):
                       item_id: int = None, thread: int = None, lock: bool = False):
         """Archives all threads made by the bot."""
         if not interaction.user.resolved_permissions.manage_threads:
-            return await interaction.response.send_message("You don't have permission to do that.")
+            raise ErrorWithContext(1, "Lacking permission `manage_threads`.")
         await interaction.response.defer()
         threads = []
         if entire_server:
