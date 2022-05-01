@@ -96,7 +96,7 @@ class Manga(Cog):
     ):
         """Subscribe to a specific manga entry."""
         await interaction.response.defer()
-        manga_id = await resolve_id_from_thread_or_id(id, thread)
+        manga_id = await resolve_id_from_thread_or_id(id, thread or interaction.channel)
         if target is None:
             target = interaction.user
         if target.id != interaction.user.id:
@@ -113,7 +113,7 @@ class Manga(Cog):
     ):
         """Unsubscribe from a specific manga entry."""
         await interaction.response.defer()
-        manga_id = await resolve_id_from_thread_or_id(id, thread)
+        manga_id = await resolve_id_from_thread_or_id(id, thread or interaction.channel)
         if target is None:
             target = interaction.user
         if target.id != interaction.user.id:
@@ -129,7 +129,7 @@ class Manga(Cog):
     ):
         """Pause a specific manga entry."""
         await interaction.response.defer()
-        id = await resolve_id_from_thread_or_id(id, thread)
+        id = await resolve_id_from_thread_or_id(id, thread or interaction.channel)
         await self.pause_entry(interaction, id)
 
     @manga.command()
@@ -141,7 +141,7 @@ class Manga(Cog):
     ):
         """Unpause a specific manga entry."""
         await interaction.response.defer()
-        id = await resolve_id_from_thread_or_id(id, thread)
+        id = await resolve_id_from_thread_or_id(id, thread or interaction.channel)
         await self.unpause_entry(interaction, id)
 
     @manga.command()
@@ -153,7 +153,7 @@ class Manga(Cog):
         json: Optional[Attachment] = None,
     ):
         await interaction.response.defer()
-        id = await resolve_id_from_thread_or_id(id, thread)
+        id = await resolve_id_from_thread_or_id(id, thread or interaction.channel)
         if not json:
             await self.customize_entry(interaction, id)
         else:
