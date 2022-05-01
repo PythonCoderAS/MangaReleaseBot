@@ -152,7 +152,6 @@ class Manga(Cog):
         thread: Optional[AppCommandThread] = None,
         json: Optional[Attachment] = None,
     ):
-        await interaction.response.defer()
         id = await resolve_id_from_thread_or_id(id, thread or interaction.channel)
         if not json:
             await self.customize_entry(interaction, id)
