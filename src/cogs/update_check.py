@@ -1,5 +1,5 @@
 import logging
-from asyncio import CancelledError, Lock, create_task, gather, shield, wait_for
+from asyncio import CancelledError, TimeoutError, Lock, create_task, gather, shield, wait_for
 from collections import defaultdict
 from datetime import datetime
 from typing import List, TYPE_CHECKING
