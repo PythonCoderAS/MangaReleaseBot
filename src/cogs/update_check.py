@@ -193,7 +193,7 @@ class UpdateChecker(Cog):
                 ),
                 60 * 9,
             )
-        except CancelledError:
+        except (CancelledError, TimeoutError):
             logger.debug("Stopped waiting for the update check.")
         self.bot.config_manager.last_updated = int(cur_time.timestamp())
         await self.bot.config_manager.save()
