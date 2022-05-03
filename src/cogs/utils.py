@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from discord import AllowedMentions, Interaction, TextChannel
-from discord.app_commands import command, default_permissions
+from discord.app_commands import command, default_permissions, guild_only
 from discord.ext.commands import Cog
 
 if TYPE_CHECKING:
@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 
 class Utils(Cog):
     @command()
+    @guild_only()
     @default_permissions(manage_threads=True)
     async def cleanup(
         self,
