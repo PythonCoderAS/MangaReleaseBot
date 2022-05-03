@@ -3,8 +3,8 @@ from json import JSONDecodeError, loads
 from typing import Optional, TYPE_CHECKING, Union
 
 from discord import Attachment, InteractionType, Member, Role, TextChannel, User
-from discord.app_commands import AppCommandThread, Group
-from discord.ext.commands import Cog
+from discord.app_commands import AppCommandThread, command, guild_only
+from discord.ext.commands import Cog, GroupCog
 from tortoise.functions import Count
 
 from .._patched.types.discord import Context, Interaction
@@ -17,13 +17,14 @@ if TYPE_CHECKING:
     from ..bot import MangaReleaseBot
 
 
-class Manga(Cog):
-    manga = Group(name="manga", description="Commands for managing manga updates.")
-
+@guild_only()
+class Manga(
+    GroupCog, group_name="manga", description="Commands for managing manga updates."
+):
     def __init__(self, source_map: dict[str, BaseSource]):
         self.source_map = source_map
 
-    @manga.command()
+    @command()
     async def add(
         self,
         interaction: Interaction,
@@ -86,7 +87,7 @@ class Manga(Cog):
         else:
             await ctx.send(f"Could not find a source for {url}.")
 
-    @manga.command()
+    @command()
     async def subscribe(
         self,
         interaction: Interaction,
@@ -103,7 +104,7 @@ class Manga(Cog):
             await get_manga_entry(manga_id, check_permissions_interaction=interaction)
         await self.subscribe_user(interaction, id, target)
 
-    @manga.command()
+    @command()
     async def unsubscribe(
         self,
         interaction: Interaction,
@@ -120,7 +121,7 @@ class Manga(Cog):
             await get_manga_entry(manga_id, check_permissions_interaction=interaction)
         await self.unsubscribe_user(interaction, id, target)
 
-    @manga.command()
+    @command()
     async def pause(
         self,
         interaction: Interaction,
@@ -132,7 +133,7 @@ class Manga(Cog):
         id = await resolve_id_from_thread_or_id(id, thread or interaction.channel)
         await self.pause_entry(interaction, id)
 
-    @manga.command()
+    @command()
     async def unpause(
         self,
         interaction: Interaction,
@@ -144,7 +145,7 @@ class Manga(Cog):
         id = await resolve_id_from_thread_or_id(id, thread or interaction.channel)
         await self.unpause_entry(interaction, id)
 
-    @manga.command()
+    @command()
     async def customize(
         self,
         interaction: Interaction,

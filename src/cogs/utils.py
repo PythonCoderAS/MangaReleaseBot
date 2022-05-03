@@ -1,10 +1,8 @@
 from typing import TYPE_CHECKING
 
 from discord import AllowedMentions, Interaction, TextChannel
-from discord.app_commands import command
+from discord.app_commands import command, default_permissions
 from discord.ext.commands import Cog
-
-from ..errors.exceptions import ErrorWithContext
 
 if TYPE_CHECKING:
     from ..bot import MangaReleaseBot
@@ -12,6 +10,7 @@ if TYPE_CHECKING:
 
 class Utils(Cog):
     @command()
+    @default_permissions(manage_threads=True)
     async def cleanup(
         self,
         interaction: Interaction,
@@ -22,8 +21,6 @@ class Utils(Cog):
         lock: bool = False,
     ):
         """Archives all threads made by the bot."""
-        if not interaction.user.resolved_permissions.manage_threads:
-            raise ErrorWithContext(1, "Lacking permission `manage_threads`.")
         await interaction.response.defer()
         threads = []
         if entire_server:
