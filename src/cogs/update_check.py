@@ -131,10 +131,15 @@ class UpdateChecker(Cog):
                         await self.archive_thread(thread)
             await gather(*[self.make_entry(task) for task in tasks])
 
-    async def update_check_source(self, source: BaseSource, data: Dict[str, Sequence[MangaEntry]]):
+    async def update_check_source(self, source: BaseSource, data: Dict[str, Sequence[MangaEntry]]) -> List[UpdateEntry]:
         last_updated = self.last_updated(source.source_name)
-        data = await source.check_updates(last_updated, data)
-        setattr(self.bot.config_manager, f"last_updated_{source.source_name}",
+        try:
+            data = await source.check_updates(last_updated, data)
+        except Exception as e:
+            logger.error(f"Error checking updates for {source.source_name}: {e}")
+            return []
+        else:
+            setattr(self.bot.config_manager, f"last_updated_{source.source_name}",
                 datetime.now(UTC).timestamp())
         return data
 
