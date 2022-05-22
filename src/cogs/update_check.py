@@ -1,16 +1,8 @@
 import logging
-from asyncio import (
-    CancelledError,
-    TimeoutError,
-    Lock,
-    create_task,
-    gather,
-    shield,
-    wait_for,
-)
+from asyncio import (CancelledError, Lock, TimeoutError, create_task, gather, shield, wait_for)
 from collections import defaultdict
 from datetime import datetime
-from typing import List, TYPE_CHECKING
+from typing import Dict, List, Sequence, TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
 from discord import ChannelType, Object, TextChannel, Thread
@@ -30,9 +22,9 @@ logger = logging.getLogger(__name__)
 
 
 class UpdateChecker(Cog):
-    @property
-    def last_updated(self):
-        return datetime.fromtimestamp(self.bot.config_manager.last_updated, tz=UTC)
+    def last_updated(self, source: str) -> datetime:
+        return datetime.fromtimestamp(getattr(self.bot.config_manager, f"last_updated_{source}",
+                                              self.bot.config_manager.last_updated), tz=UTC)
 
     def __init__(self, bot: "MangaReleaseBot"):
         self.bot = bot
@@ -75,7 +67,7 @@ class UpdateChecker(Cog):
             view=ThreadActions(manga_entry.id),
         )
         if thread.permissions_for(
-            self.bot.get_guild(manga_entry.guild_id).me
+                self.bot.get_guild(manga_entry.guild_id).me
         ).manage_messages:
             await action_message.pin()
         thread_data = ThreadData(thread_id=thread.id, entry=manga_entry)
@@ -139,6 +131,13 @@ class UpdateChecker(Cog):
                         await self.archive_thread(thread)
             await gather(*[self.make_entry(task) for task in tasks])
 
+    async def update_check_source(self, source: BaseSource, data: Dict[str, Sequence[MangaEntry]]):
+        last_updated = self.last_updated(source.source_name)
+        data = await source.check_updates(last_updated, data)
+        setattr(self.bot.config_manager, f"last_updated_{source.source_name}",
+                datetime.now(UTC).timestamp())
+        return data
+
     @loop(minutes=10, reconnect=False)
     async def update_check(self):
         await self.bot.wait_until_ready()
@@ -146,9 +145,9 @@ class UpdateChecker(Cog):
         cur_time = datetime.now(UTC)
         first_filter_round = (
             await MangaEntry.all()
-            .distinct()
-            .filter(deleted=None, paused=None)
-            .values_list("guild_id", "channel_id")
+                .distinct()
+                .filter(deleted=None, paused=None)
+                .values_list("guild_id", "channel_id")
         )
         ids_to_check = []
         for guild_id, channel_id in first_filter_round:
@@ -159,9 +158,9 @@ class UpdateChecker(Cog):
                     ids_to_check.append(channel_id)
         second_filter_round: List[str] = (
             await MangaEntry.all()
-            .distinct()
-            .filter(deleted=None, paused=None)
-            .values_list("source_id", flat=True)
+                .distinct()
+                .filter(deleted=None, paused=None)
+                .values_list("source_id", flat=True)
         )
         tasks = []
         for source_id in second_filter_round:
@@ -178,7 +177,7 @@ class UpdateChecker(Cog):
                     by_item_id[item.item_id].append(item)
                 logger.debug("Providing %s to %s", items, type(source).__name__)
                 tasks.append(
-                    create_task(source.check_updates(self.last_updated, by_item_id))
+                    create_task(self.update_check_source(source, by_item_id))
                 )
             else:
                 logger.debug("No source object found for %s", source_id)

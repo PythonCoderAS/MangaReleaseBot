@@ -1,7 +1,7 @@
 """Methods for managing configuration values via a database."""
 import logging
 from asyncio import gather
-from typing import Any, Optional
+from typing import Any
 
 from .models import Metadata
 
@@ -24,7 +24,7 @@ class ConfigManager:
             data[item.key] = item
         return cls(data)
 
-    def __getattr__(self, item: str) -> Optional[Any]:
+    def __getattr__(self, item: str) -> Any:
         try:
             return self.data[item].value
         except KeyError:
