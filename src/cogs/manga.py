@@ -97,7 +97,9 @@ class Manga(
     ):
         """Subscribe to a specific manga entry."""
         await interaction.response.defer()
-        manga_id = await resolve_id_from_thread_or_id(id, thread or (interaction.channel if not id else None))
+        manga_id = await resolve_id_from_thread_or_id(
+            id, thread or (interaction.channel if not id else None)
+        )
         if target is None:
             target = interaction.user
         if target.id != interaction.user.id:
@@ -114,7 +116,9 @@ class Manga(
     ):
         """Unsubscribe from a specific manga entry."""
         await interaction.response.defer()
-        manga_id = await resolve_id_from_thread_or_id(id, thread or (interaction.channel if not id else None))
+        manga_id = await resolve_id_from_thread_or_id(
+            id, thread or (interaction.channel if not id else None)
+        )
         if target is None:
             target = interaction.user
         if target.id != interaction.user.id:
@@ -130,7 +134,9 @@ class Manga(
     ):
         """Pause a specific manga entry."""
         await interaction.response.defer()
-        id = await resolve_id_from_thread_or_id(id, thread or (interaction.channel if not id else None))
+        id = await resolve_id_from_thread_or_id(
+            id, thread or (interaction.channel if not id else None)
+        )
         await self.pause_entry(interaction, id)
 
     @command()
@@ -142,7 +148,9 @@ class Manga(
     ):
         """Unpause a specific manga entry."""
         await interaction.response.defer()
-        id = await resolve_id_from_thread_or_id(id, thread or (interaction.channel if not id else None))
+        id = await resolve_id_from_thread_or_id(
+            id, thread or (interaction.channel if not id else None)
+        )
         await self.unpause_entry(interaction, id)
 
     @command()
@@ -153,7 +161,9 @@ class Manga(
         thread: Optional[AppCommandThread] = None,
         json: Optional[Attachment] = None,
     ):
-        id = await resolve_id_from_thread_or_id(id, thread or (interaction.channel if not id else None))
+        id = await resolve_id_from_thread_or_id(
+            id, thread or (interaction.channel if not id else None)
+        )
         if not json:
             await self.customize_entry(interaction, id)
         else:

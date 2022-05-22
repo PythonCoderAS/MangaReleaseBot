@@ -17,5 +17,8 @@ ipython = "*"
 black = "*"
 isort = "*"
 
+[scripts]
+lint = "black ."
+
 [requires]
 python_version = "3.9"
