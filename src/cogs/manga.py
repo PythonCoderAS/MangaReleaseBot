@@ -104,7 +104,7 @@ class Manga(
             target = interaction.user
         if target.id != interaction.user.id:
             await get_manga_entry(manga_id, check_permissions_interaction=interaction)
-        await self.subscribe_user(interaction, id, target)
+        await self.subscribe_user(interaction, manga_id, target)
 
     @command()
     async def unsubscribe(
@@ -123,7 +123,7 @@ class Manga(
             target = interaction.user
         if target.id != interaction.user.id:
             await get_manga_entry(manga_id, check_permissions_interaction=interaction)
-        await self.unsubscribe_user(interaction, id, target)
+        await self.unsubscribe_user(interaction, manga_id, target)
 
     @command()
     async def pause(
