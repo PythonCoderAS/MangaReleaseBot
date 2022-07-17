@@ -42,7 +42,7 @@ class MangaReleaseBot(Bot):
         @self.tree.error
         async def on_error(interaction: Interaction, exception: AppCommandError):
             logger.debug(
-                "Error on tree command %s", interaction.command, exc_info=exception
+                "Error on tree command %s", interaction.command.name, exc_info=exception
             )
             if isinstance(exception, AppCommandInvokeError):
                 if isinstance(exception.original, BaseError):
