@@ -165,7 +165,7 @@ class UpdateChecker(Cog):
     @loop(minutes=10, reconnect=False)
     async def update_check(self):
         await self.bot.wait_until_ready()
-        logger.debug("Starting update check (last checked at %s)", self.last_updated)
+        logger.debug("Starting update check (last checked at %s)", self.bot.config_manager.last_updated)
         cur_time = datetime.now(UTC)
         first_filter_round = (
             await MangaEntry.all()
