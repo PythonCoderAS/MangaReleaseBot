@@ -204,11 +204,10 @@
         },
         "discord-py": {
             "git": "https://github.com/Rapptz/discord.py.git",
-            "ref": "8ab4d25d40505a4cef48692eb51db7a3037f89b4"
+            "ref": "e04af033c0b1cd40186762b993bc7456bdba4595"
         },
         "discord.py": {
-            "git": "https://github.com/Rapptz/discord.py.git",
-            "ref": "8ab4d25d40505a4cef48692eb51db7a3037f89b4"
+            "git": "https://github.com/Rapptz/discord.py.git"
         },
         "frozenlist": {
             "hashes": [
@@ -877,11 +876,11 @@
         },
         "pathspec": {
             "hashes": [
-                "sha256:01eecd304ba0e6eeed188ae5fa568e99ef10265af7fd9ab737d6412b4ee0ab85",
-                "sha256:aefa80ac32d5bf1f96139dca67cefb69a431beff4e6bf1168468f37d7ab87015"
+                "sha256:46846318467efc4556ccfd27816e004270a9eeeeb4d062ce5e6fc7a87c573f93",
+                "sha256:7ace6161b621d31e7902eb6b5ae148d12cfd23f4a249b9ffb6b9fee12084323d"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==0.10.0"
+            "version": "==0.10.1"
         },
         "pexpect": {
             "hashes": [
@@ -908,11 +907,11 @@
         },
         "prompt-toolkit": {
             "hashes": [
-                "sha256:859b283c50bde45f5f97829f77a4674d1c1fcd88539364f1b28a37805cfd89c0",
-                "sha256:d8916d3f62a7b67ab353a952ce4ced6a1d2587dfe9ef8ebc30dd7c386751f289"
+                "sha256:9696f386133df0fc8ca5af4895afe5d78f5fcfe5258111c2a79a1c3e41ffa96d",
+                "sha256:9ada952c9d1787f52ff6d5f3484d0b4df8952787c087edf6a1f7c2cb1ea88148"
             ],
             "markers": "python_full_version >= '3.6.2'",
-            "version": "==3.0.30"
+            "version": "==3.0.31"
         },
         "ptyprocess": {
             "hashes": [
@@ -956,7 +955,7 @@
                 "sha256:7c5599b102feddaa661c826c56ab4fee28bfd17f5abca1ebbe3e7f19d7c97983",
                 "sha256:8fefa2a1a1365bf5520aac41836fbee479da67864514bdb821f31ce07ce65349"
             ],
-            "markers": "python_version >= '3.7' and python_version < '4.0'",
+            "markers": "python_version >= '3.7' and python_version < '4'",
             "version": "==2.28.1"
         },
         "setuptools": {
@@ -1090,7 +1089,7 @@
                 "sha256:3fa96cf423e6987997fc326ae8df396db2a8b7c667747d47ddd8ecba91f4a74e",
                 "sha256:b930dd878d5a8afb066a637fbb35144fe7901e3b209d1cd4f524bd0e9deee997"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5' and python_version < '4.0'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5' and python_version < '4'",
             "version": "==1.26.12"
         },
         "wcwidth": {
