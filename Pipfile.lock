@@ -297,11 +297,11 @@
         },
         "hondana": {
             "hashes": [
-                "sha256:3d1b2e21384482f5e56fa1a5043b7aae57bd4547a9d46743f3608a20e0e40dbf",
-                "sha256:88603494be0d5fc54cc7b92d690c965c7408926c3786935316bc2bb387132b2b"
+                "sha256:2cb048fcadd121844cb34f595e6ce89649e337f39b15f17c494a131ec6ccfbe7",
+                "sha256:42bd6fcd189ecef9da39666dcedd11215d999c3043cab034d163da0f0da98025"
             ],
             "index": "pypi",
-            "version": "==3.1.0"
+            "version": "==3.2.0"
         },
         "idna": {
             "hashes": [
