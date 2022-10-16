@@ -219,7 +219,7 @@
         },
         "discord-py": {
             "git": "https://github.com/Rapptz/discord.py.git",
-            "ref": "ba2ad58017a123286ff99793266fe240f38b3f2f"
+            "ref": "3bca40352ecfa5b219bae0527252ee5d296113e7"
         },
         "discord.py": {
             "git": "https://github.com/Rapptz/discord.py.git"
@@ -296,11 +296,10 @@
         },
         "hondana": {
             "hashes": [
-                "sha256:2cb048fcadd121844cb34f595e6ce89649e337f39b15f17c494a131ec6ccfbe7",
-                "sha256:42bd6fcd189ecef9da39666dcedd11215d999c3043cab034d163da0f0da98025"
+                "sha256:713774011bdee205bffa79e8b81eee27adc7daec38528f1d00433d2ff3700303"
             ],
             "index": "pypi",
-            "version": "==3.2.0"
+            "version": "==3.3.0"
         },
         "idna": {
             "hashes": [
