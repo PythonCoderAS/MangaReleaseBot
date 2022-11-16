@@ -209,7 +209,7 @@
                 "sha256:5a3d016c7c547f69d6f81fb0db9449ce888b418b5b9952cc5e6e66843e9dd845",
                 "sha256:83e9a75d1911279afd89352c68b45348559d1fc0506b054b346651b5e7fee29f"
             ],
-            "markers": "python_full_version >= '3.6.0'",
+            "markers": "python_version >= '3.6'",
             "version": "==2.1.1"
         },
         "click": {
@@ -228,6 +228,10 @@
             "version": "==0.9.0"
         },
         "discord-py": {
+            "git": "https://github.com/Rapptz/discord.py.git",
+            "ref": "24bdb44d54686448a336ea6d72b1bf8600ef7220"
+        },
+        "discord.py": {
             "git": "https://github.com/Rapptz/discord.py.git",
             "ref": "24bdb44d54686448a336ea6d72b1bf8600ef7220"
         },
@@ -318,10 +322,10 @@
         },
         "hondana": {
             "hashes": [
-                "sha256:2063a6ced2f9dc8e710788e02a87e520cfeda10691a9443e68193622fa3f0c3c"
+                "sha256:f6c3ef42d3d559188e14e5a592cbaf35ab8384cb2b4fcf583c4de62977f656b6"
             ],
             "index": "pypi",
-            "version": "==3.4.4"
+            "version": "==3.4.5"
         },
         "idna": {
             "hashes": [
@@ -562,7 +566,6 @@
                 "sha256:bff4d79abfca7fb805972bb2438e8e0cd2e6590bc2cfd7593a803518a027bbf0"
             ],
             "index": "pypi",
-            "markers": null,
             "version": "==0.19.2"
         },
         "typing-extensions": {
@@ -690,7 +693,7 @@
                 "sha256:58d5c3d29f5a36ffeb94f02f0d786cd53014cf9b3b3951d42e0080d8a9498d30",
                 "sha256:ad9aa55b65ef2808eb405f46cf74df7fcb7044d5cbc26487f96eb2ef2e436693"
             ],
-            "markers": "python_full_version >= '3.6.0'",
+            "markers": "python_version >= '3.6'",
             "version": "==4.11.1"
         },
         "black": {
@@ -733,7 +736,7 @@
                 "sha256:5a3d016c7c547f69d6f81fb0db9449ce888b418b5b9952cc5e6e66843e9dd845",
                 "sha256:83e9a75d1911279afd89352c68b45348559d1fc0506b054b346651b5e7fee29f"
             ],
-            "markers": "python_full_version >= '3.6.0'",
+            "markers": "python_version >= '3.6'",
             "version": "==2.1.1"
         },
         "click": {
@@ -910,11 +913,11 @@
         },
         "pathspec": {
             "hashes": [
-                "sha256:46846318467efc4556ccfd27816e004270a9eeeeb4d062ce5e6fc7a87c573f93",
-                "sha256:7ace6161b621d31e7902eb6b5ae148d12cfd23f4a249b9ffb6b9fee12084323d"
+                "sha256:88c2606f2c1e818b978540f73ecc908e13999c6c3a383daf3705652ae79807a5",
+                "sha256:8f6bf73e5758fd365ef5d58ce09ac7c27d2833a8d7da51712eac6e27e35141b0"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==0.10.1"
+            "version": "==0.10.2"
         },
         "pexpect": {
             "hashes": [
